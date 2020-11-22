@@ -29,4 +29,23 @@ def getPatientByUsername(username):
     if patient is None:
         return jsonify({"error": "Patient not found"}), 404
 
-    return jsonify(patient.serialize()), 200
+    appointments = []
+    for appointment in patient.p_appointments:
+        doctor = appointment.doctor
+        doctor_name = doctor.first_name + " " + doctor.last_name
+        json = appointment.serialize()
+        json['doctor_name'] = doctor_name
+        appointments.append(json)
+    prescriptions = []
+    for prescription in patient.p_prescriptions:
+        doctor = prescription.doctor
+        doctor_name = doctor.first_name + " " + doctor.last_name
+        json = prescription.serialize()
+        json['doctor_name'] = doctor_name
+        prescriptions.append(json)
+
+    payload = patient.serialize()
+    payload['appointments'] = appointments
+    payload['prescriptions'] = prescriptions
+
+    return jsonify(payload), 200

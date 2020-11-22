@@ -93,6 +93,15 @@ class Appointment(db.Model):
         self.end = end
         self.status = status
 
+    def serialize(self):
+        return {
+            "description": self.description,
+            "date": self.date.strftime("%Y-%m-%d"),
+            "start": self.start.strftime("%H:%M"),
+            "end": self.end.strftime("%H:%M"),
+            "status": self.status
+        }
+
 
 class Prescription(db.Model):
     __tablename__ = 'prescriptions'
@@ -113,8 +122,15 @@ class Prescription(db.Model):
         self.dosage = dosage
         self.status = status
 
+    def serialize(self):
+        return {
+            "drug": self.drug,
+            "date": self.date.strftime("%Y-%m-%d"),
+            "dosage": self.dosage,
+            "status": self.status
+        }
 
-db.create_all()
+
 # date1 = date(2020, 1, 1)
 # date.strftime()
 # time1 = time(9,10)
