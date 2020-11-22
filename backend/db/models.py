@@ -1,12 +1,8 @@
-from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.sql import func
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask import Flask
 import enum
-
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///tmp/test.db'
-db = SQLAlchemy(app)
+from datetime import date, time
+from backend.db import db
 
 
 class UserType(enum.Enum):
@@ -52,12 +48,25 @@ class User(db.Model):
     def check_password(self, password):
         return check_password_hash(self.password, password)
 
+    def serialize(self):
+        return {
+            "email": self.email,
+            "first_name": self.first_name,
+            "last_name": self.last_name,
+            "dob": self.dob.strftime("%Y-%m-%d"),
+            "phone_number": self.phone_number,
+            "user_type": self.user_type.name
+        }
+
 
 class Specialization(db.Model):
     __tablename__ = 'specialization'
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String())
+    name = db.Column(db.String(), unique=True)
+
+    def __init__(self, spec):
+        self.name = spec
 
 
 class Appointment(db.Model):
@@ -100,3 +109,21 @@ class Prescription(db.Model):
         self.date = date
         self.dosage = dosage
         self.status = status
+
+
+db.create_all()
+# date1 = date(2020, 1, 1)
+# date.strftime()
+# time1 = time(9,10)
+# p1 = User('1', '1', '1', date1,'1',UserType.PATIENT)
+# d1 = User('2', '2', '2', date1,'2',UserType.DOCTOR)
+# user1 = User.query.filter_by(email='1').first()
+# user2 = User.query.filter_by(email='2').first()
+# appointment1 = Appointment('1',date1,time1,time1)
+# appointment1.patient = user1
+# appointment1.doctor = user2
+# db.session.add(appointment1)
+# db.session.commit()
+# q = Appointment.query.all()
+# for x in q:
+#     print(x)
