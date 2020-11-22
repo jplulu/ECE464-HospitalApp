@@ -11,12 +11,22 @@ patient_routes = Blueprint('patient_routes', __name__, url_prefix='/patient')
 def addPatient():
     data = request.get_json()
     dob = datetime.strptime(data['dob'], '%Y-%m-%d').date()
-    new_patient = User(data['email'], data['first_name'], data['last_name'], dob, data['phone_number'], UserType.PATIENT)
+    new_patient = User(data['email'], data['username'], data['first_name'], data['last_name'], dob,
+                       data['phone_number'], UserType.PATIENT)
     new_patient.set_password(data['password'])
     try:
         db.session.add(new_patient)
         db.session.commit()
-    except IntegrityError as e:
-        return jsonify({"error": "Email already registered"}), 409
+    except IntegrityError:
+        return jsonify({"error": "Email or username already registered"}), 409
 
     return jsonify(new_patient.serialize()), 200
+
+
+@patient_routes.route('/<username>', methods=['GET'])
+def getPatientByUsername(username):
+    patient = User.query.filter_by(username=username, user_type=UserType.PATIENT).first()
+    if patient is None:
+        return jsonify({"error": "Patient not found"}), 404
+
+    return jsonify(patient.serialize()), 200

@@ -23,6 +23,7 @@ class User(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
+    username = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String())
     first_name = db.Column(db.String(30), nullable=False)
     last_name = db.Column(db.String(30), nullable=False)
@@ -34,8 +35,9 @@ class User(db.Model):
     specializations = db.relationship('Specialization', secondary=specializations, lazy='subquery',
                                       backref=db.backref('doctors', lazy=True))
 
-    def __init__(self, email, first_name, last_name, dob, phone_number, user_type):
+    def __init__(self, email, username, first_name, last_name, dob, phone_number, user_type):
         self.email = email
+        self.username = username
         self.first_name = first_name
         self.last_name = last_name
         self.dob = dob
@@ -51,6 +53,7 @@ class User(db.Model):
     def serialize(self):
         return {
             "email": self.email,
+            "username": self.username,
             "first_name": self.first_name,
             "last_name": self.last_name,
             "dob": self.dob.strftime("%Y-%m-%d"),
