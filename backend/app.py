@@ -1,8 +1,8 @@
 from backend import app
-from backend.routes.patient_routes import patient_routes
+from backend.routes.user_routes import user_routes
 from backend.db import db
 
-app.register_blueprint(patient_routes)
+app.register_blueprint(user_routes)
 
 
 @app.before_first_request
