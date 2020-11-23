@@ -8,7 +8,7 @@ user_routes = Blueprint('user_routes', __name__, url_prefix='/user')
 
 
 @user_routes.route('/register', methods=['POST'])
-def addPatient():
+def addUser():
     data = request.get_json()
     dob = datetime.strptime(data['dob'], '%Y-%m-%d').date()
     if data['user_type'] == UserType.PATIENT.name:
