@@ -89,7 +89,7 @@ def getUserByUsername(username):
     return jsonify(payload), 200
 
 # TODO: Filter by specialization
-@user_routes.route('/doctor', methods=['GET'])
+@user_routes.route('/getDoctors', methods=['GET'])
 def getDoctors():
     doctors = User.query.filter_by(user_type=UserType.DOCTOR).all()
     if doctors is None:

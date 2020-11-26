@@ -12,6 +12,10 @@ def addAppointment():
     data = request.get_json()
     patient = User.query.filter_by(username=data['patient'], user_type=UserType.PATIENT).first()
     doctor = User.query.filter_by(username=data['doctor'], user_type=UserType.DOCTOR).first()
+    if patient is None:
+        return jsonify({"error": "Patient not found"}), 400
+    if doctor is None:
+        return jsonify({"error": "Doctor not found"}), 400
     date = datetime.strptime(data['date'], '%Y-%m-%d').date()
     start = datetime.strptime(data['start'], '%H:%M').time()
     end = datetime.strptime(data['end'], '%H:%M').time()
