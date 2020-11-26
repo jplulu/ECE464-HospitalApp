@@ -1,11 +1,9 @@
 import names
 from random import randrange, choice, randint
 from datetime import timedelta, datetime, time
-
-from sqlalchemy import engine, create_engine
+from sqlalchemy import exc
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-
-from backend.db import db
 from backend.db import models
 
 
@@ -15,7 +13,7 @@ dob_range = [datetime.strptime('1/1/1950 1:30 PM', '%m/%d/%Y %I:%M %p'),
 
 
 
-def create_Users(num_entries):
+def create_users(num_entries):
     user_arr, email_arr, pw_arr, fname_arr, \
     lname_arr, dob_arr, pnum_arr, usertype_arr, uname_arr = ([] for i in range(9))
     usertype_weighting = [models.UserType.PATIENT] * 100 + [models.UserType.DOCTOR] * 13 + [models.UserType.ADMIN] * 3
@@ -41,20 +39,13 @@ def create_Users(num_entries):
         usertype_arr.append(choice(usertype_weighting))
         pnum_arr.append(phone_number)
 
-    ret = []
-    ret.append(email_arr)
-    ret.append(uname_arr)
-    ret.append(fname_arr)
-    ret.append(lname_arr)
-    ret.append(dob_arr)
-    ret.append(pnum_arr)
-    ret.append(usertype_arr)
+    ret = [email_arr, uname_arr, fname_arr, lname_arr, dob_arr, pnum_arr, usertype_arr]
 
     for i in range(num_entries):
         user_arr.append(models.User(ret[0][i], ret[1][i],ret[2][i],ret[3][i],ret[4][i],ret[5][i],ret[6][i]))
     return user_arr
 
-def create_Specialization():
+def create_specialization():
     spec_arr = []
     specializations = ["This", "That", "Those", "Whose", "What"]
     for spec in specializations:
@@ -62,78 +53,82 @@ def create_Specialization():
 
     return spec_arr
 
-def create_Appointment(patients, doctors):
+def create_appointment(patients, doctors):
     app_arr = []
     date_range = [datetime.strptime('1/1/2000 1:30 PM', '%m/%d/%Y %I:%M %p'),
                   datetime.strptime('1/1/2010 4:50 AM', '%m/%d/%Y %I:%M %p')]
-    def rand_date(date_range):
-        time_between_dates = date_range[1] - date_range[0]
+    def rand_date(d_range):
+        time_between_dates = d_range[1] - d_range[0]
         days_between_dates = time_between_dates.days
         random_number_of_days = randrange(days_between_dates)
-        random_date = date_range[0] + timedelta(days=random_number_of_days)
-        return(random_date)
+        random_date = d_range[0] + timedelta(days=random_number_of_days)
+        return random_date
     for patient in patients:
-        description = "Placeholder"
-        date = rand_date(date_range)
-        start = time(9,10)
-        end = time(10,10)
-        app = models.Appointment(description,date,start,end)
-        app.patient = patient
-        app.doctor = choice(doctors)
-        app_arr.append(app)
+        # limit # of appointments
+        if randint(1, 10) > 4:
+            description = "Placeholder"
+            date = rand_date(date_range)
+            start = time(9,10)
+            end = time(10,10)
+            app = models.Appointment(description,date,start,end)
+            app.patient = patient
+            app.doctor = choice(doctors)
+            app_arr.append(app)
 
     return app_arr
 
+def create_prescription(patients, doctors):
+    prep_arr = []
+    date_range = [datetime.strptime('1/1/2000 1:30 PM', '%m/%d/%Y %I:%M %p'),
+                  datetime.strptime('1/1/2010 4:50 AM', '%m/%d/%Y %I:%M %p')]
+    drug_list = [["Drug1","1 mg"], ["Drug2","2 mg"], ["Drug3","3 mg"], ["Drug4","4 mg"],
+                 ["Drug5","5 mg"], ["Drug6","6 mg"], ["Drug7","7 mg"], ["Drug8","8 mg"]]
+    def rand_date(d_range):
+        time_between_dates = d_range[1] - d_range[0]
+        days_between_dates = time_between_dates.days
+        random_number_of_days = randrange(days_between_dates)
+        random_date = d_range[0] + timedelta(days=random_number_of_days)
+        return random_date
+
+    for patient in patients:
+        if randint(1,10) > 7:
+            drug_choose = choice(drug_list)
+            drug = drug_choose[0]
+            dosage = drug_choose[1]
+            date = rand_date(date_range)
+            prescription = models.Prescription(drug=drug, date=date, dosage=dosage)
+            prescription.patient = patient
+            prescription.doctor = choice(doctors)
+            prep_arr.append(prescription)
+
+    return prep_arr
+
 
 def populate():
-    usr_arr = create_Users(20)
-    for usr in usr_arr:
-        db.session.add(usr)
-        db.session.commit()
-
-    engine = create_engine("sqlite:///db/test.db")
-    conn = engine.connect()
-    session = sessionmaker(bind=engine)
+    e = create_engine("sqlite:///db/test.db")
+    conn = e.connect()
+    session = sessionmaker(bind=e)
     s = session()
-
-    spec_arr = create_Specialization()
-    for spec in spec_arr:
-        s.add(spec)
+    # Populate Users
+    usr_arr = create_users(100)
+    for usr in usr_arr:
+        s.add(usr)
     s.commit()
-
+    # Populate Specializations
+    for spec in create_specialization():
+        s.add(spec)
+    try:
+        s.commit()
+    except exc.IntegrityError:
+        s.rollback()
+    # Populate Appointments
     doc = s.query(models.User).filter(models.User.user_type == models.UserType.DOCTOR).all()
     pat = s.query(models.User).filter(models.User.user_type == models.UserType.PATIENT).all()
-    app_arr = create_Appointment(pat, doc)
-    for app in app_arr:
+    for app in create_appointment(pat, doc):
         s.add(app)
     s.commit()
+    # Populate Prescription
+    for pres in create_prescription(pat, doc):
+        s.add(pres)
+    s.commit()
 
-    print("________________________________________")
-    test = s.query(models.Appointment)
-    for them in test.all():
-        print("++++++++++++++++++++++++++")
-        print(them.patient.username)
-        print(them.doctor.username)
-        print(them.description)
-        print(them.date)
-        print(them.start)
-        print(them.end)
-
-    # print(engine.table_names())
-    #
-    # print("________________________________________")
-    # test = s.query(models.User).filter(models.User.user_type == models.UserType.ADMIN)
-    # for them in test.all():
-    #     print(them.username)
-    # print("________________________________________")
-    # test = s.query(models.User).filter(models.User.user_type == models.UserType.PATIENT)
-    # for them in test.all():
-    #     print(them.username)
-    # print("________________________________________")
-    # test = s.query(models.User).filter(models.User.user_type == models.UserType.DOCTOR)
-    # for them in test.all():
-    #     print(them.username)
-    # print("________________________________________")
-    # test = s.query(models.Specialization.name)
-    # for them in test.all():
-    #     print(them)
