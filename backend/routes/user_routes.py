@@ -8,9 +8,10 @@ user_routes = Blueprint('user_routes', __name__, url_prefix='/user')
 
 
 @user_routes.route('/register', methods=['POST'])
-def addPatient():
+def addUser():
     data = request.get_json()
     dob = datetime.strptime(data['dob'], '%Y-%m-%d').date()
+
     if data['user_type'] == UserType.PATIENT.name:
         new_user = User(data['email'], data['username'], data['first_name'], data['last_name'], dob,
                         data['phone_number'], UserType.PATIENT)
@@ -25,6 +26,7 @@ def addPatient():
             else:
                 new_user.specializations.append(s)
     new_user.set_password(data['password'])
+
     try:
         db.session.add(new_user)
         db.session.commit()
@@ -43,7 +45,6 @@ def getUserByUsername(username):
     payload = user.serialize()
     appointments_list = []
     prescriptions_list = []
-    specialization_list = []
     if user.user_type == UserType.PATIENT:
         appointments = user.p_appointments
         prescriptions = user.p_prescriptions
@@ -51,13 +52,15 @@ def getUserByUsername(username):
             doctor = appointment.doctor
             doctor_name = doctor.first_name + " " + doctor.last_name
             json = appointment.serialize()
-            json['doctor_name'] = doctor_name
+            json['other_party_name'] = doctor_name
+            json['other_party_uname'] = doctor.username
             appointments_list.append(json)
         for prescription in prescriptions:
             doctor = prescription.doctor
             doctor_name = doctor.first_name + " " + doctor.last_name
             json = prescription.serialize()
-            json['doctor_name'] = doctor_name
+            json['other_party_name'] = doctor_name
+            json['other_party_uname'] = doctor.username
             prescriptions_list.append(json)
     elif user.user_type == UserType.DOCTOR:
         appointments = user.d_appointments
@@ -66,18 +69,34 @@ def getUserByUsername(username):
             patient = appointment.patient
             patient_name = patient.first_name + " " + patient.last_name
             json = appointment.serialize()
-            json['patient_name'] = patient_name
+            json['other_party_name'] = patient_name
+            json['other_party_uname'] = patient.username
             appointments_list.append(json)
         for prescription in prescriptions:
             patient = prescription.patient
             patient_name = patient.first_name + " " + patient.last_name
             json = prescription.serialize()
-            json['patient_name'] = patient_name
+            json['other_party_name'] = patient_name
+            json['other_party_uname'] = patient.username
             prescriptions_list.append(json)
         payload['specializations'] = []
         for specialization in user.specializations:
             payload['specializations'].append(specialization.name)
+
     payload['appointments'] = appointments_list
     payload['prescriptions'] = prescriptions_list
+
+    return jsonify(payload), 200
+
+# TODO: Filter by specialization
+@user_routes.route('/getDoctors', methods=['GET'])
+def getDoctors():
+    doctors = User.query.filter_by(user_type=UserType.DOCTOR).all()
+    if doctors is None:
+        return jsonify({"error": "No doctor found"}), 404
+
+    payload = {'doctors': []}
+    for doctor in doctors:
+        payload['doctors'].append(doctor.serialize())
 
     return jsonify(payload), 200

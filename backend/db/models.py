@@ -52,6 +52,7 @@ class User(db.Model):
 
     def serialize(self):
         return {
+            "id": self.id,
             "email": self.email,
             "username": self.username,
             "first_name": self.first_name,
@@ -95,6 +96,7 @@ class Appointment(db.Model):
 
     def serialize(self):
         return {
+            "id": self.id,
             "description": self.description,
             "date": self.date.strftime("%Y-%m-%d"),
             "start": self.start.strftime("%H:%M"),
@@ -124,25 +126,9 @@ class Prescription(db.Model):
 
     def serialize(self):
         return {
+            "id": self.id,
             "drug": self.drug,
             "date": self.date.strftime("%Y-%m-%d"),
             "dosage": self.dosage,
             "status": self.status
         }
-
-
-# date1 = date(2020, 1, 1)
-# date.strftime()
-# time1 = time(9,10)
-# p1 = User('1', '1', '1', date1,'1',UserType.PATIENT)
-# d1 = User('2', '2', '2', date1,'2',UserType.DOCTOR)
-# user1 = User.query.filter_by(email='1').first()
-# user2 = User.query.filter_by(email='2').first()
-# appointment1 = Appointment('1',date1,time1,time1)
-# appointment1.patient = user1
-# appointment1.doctor = user2
-# db.session.add(appointment1)
-# db.session.commit()
-# q = Appointment.query.all()
-# for x in q:
-#     print(x)
