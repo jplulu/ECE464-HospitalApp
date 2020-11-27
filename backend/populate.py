@@ -5,6 +5,7 @@ from sqlalchemy import exc
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from backend.db import models
+import secrets
 
 
 dob_range = [datetime.strptime('1/1/1950 1:30 PM', '%m/%d/%Y %I:%M %p'),
@@ -81,8 +82,8 @@ def create_prescription(patients, doctors):
     prep_arr = []
     date_range = [datetime.strptime('1/1/2000 1:30 PM', '%m/%d/%Y %I:%M %p'),
                   datetime.strptime('1/1/2010 4:50 AM', '%m/%d/%Y %I:%M %p')]
-    drug_list = [["Drug1","1 mg"], ["Drug2","2 mg"], ["Drug3","3 mg"], ["Drug4","4 mg"],
-                 ["Drug5","5 mg"], ["Drug6","6 mg"], ["Drug7","7 mg"], ["Drug8","8 mg"]]
+    drug_list = ["Drug1", "Drug2", "Drug3", "Drug4",
+                 "Drug5", "Drug6", "Drug7", "Drug8"]
     def rand_date(d_range):
         time_between_dates = d_range[1] - d_range[0]
         days_between_dates = time_between_dates.days
@@ -92,9 +93,8 @@ def create_prescription(patients, doctors):
 
     for patient in patients:
         if randint(1,10) > 7:
-            drug_choose = choice(drug_list)
-            drug = drug_choose[0]
-            dosage = drug_choose[1]
+            drug = choice(drug_list)
+            dosage = str(randint(1,20)) + " mg"
             date = rand_date(date_range)
             prescription = models.Prescription(drug=drug, date=date, dosage=dosage)
             prescription.patient = patient
@@ -109,11 +109,6 @@ def populate():
     conn = e.connect()
     session = sessionmaker(bind=e)
     s = session()
-    # Populate Users
-    usr_arr = create_users(100)
-    for usr in usr_arr:
-        s.add(usr)
-    s.commit()
     # Populate Specializations
     for spec in create_specialization():
         s.add(spec)
@@ -121,6 +116,16 @@ def populate():
         s.commit()
     except exc.IntegrityError:
         s.rollback()
+    # Populate Users
+    usr_arr = create_users(100)
+    spec = s.query(models.Specialization).all()
+    for usr in usr_arr:
+        usr.set_password(secrets.token_urlsafe(16))
+        # For doctors, select a specialization from pre established table
+        if usr.user_type == models.UserType.DOCTOR:
+            usr.specializations.append(choice(spec))
+        s.add(usr)
+    s.commit()
     # Populate Appointments
     doc = s.query(models.User).filter(models.User.user_type == models.UserType.DOCTOR).all()
     pat = s.query(models.User).filter(models.User.user_type == models.UserType.PATIENT).all()
