@@ -1,7 +1,7 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, render_template
 from sqlalchemy.exc import IntegrityError
 from backend.db import db
-from backend.db.models import UserType, User, Specialization, Appointment, Prescription
+from backend.db.models import UserType, User, Specialization, Appointment, Prescription,specializations
 from datetime import datetime
 
 user_routes = Blueprint('user_routes', __name__, url_prefix='/user')
@@ -91,12 +91,17 @@ def getUserByUsername(username):
 # TODO: Filter by specialization
 @user_routes.route('/getDoctors', methods=['GET'])
 def getDoctors():
-    doctors = User.query.filter_by(user_type=UserType.DOCTOR).all()
+    # doctors = User.query.filter_by(user_type=UserType.DOCTOR).\
+    #     join(specializations, specializations.c.doctor_id == User.id).join(Specialization, specializations.c.specialization_id == Specialization.id).\
+    #     add_columns(User.email, User.first_name, User.last_name, User.phone_number, Specialization.name.label("spec_name"))
+    doctors = db.session.query(User.email, User.first_name, User.last_name, User.phone_number, Specialization.name.label("spec_name")).\
+        join(specializations, specializations.c.doctor_id == User.id).join(Specialization, specializations.c.specialization_id == Specialization.id)
+    spec = db.session.query(Specialization.name)
     if doctors is None:
         return jsonify({"error": "No doctor found"}), 404
 
-    payload = {'doctors': []}
+    payload = []
     for doctor in doctors:
-        payload['doctors'].append(doctor.serialize())
-
-    return jsonify(payload), 200
+        payload.append(doctor)
+    return render_template("showdoctor.html", doc_list=payload, specializations=spec)
+    # return jsonify(payload), 200
