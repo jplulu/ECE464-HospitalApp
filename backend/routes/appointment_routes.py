@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from sqlalchemy.exc import IntegrityError
 from backend.db import db
-from backend.db.models import UserType, User, Specialization, Appointment, Prescription
+from backend.db.models import UserType, User, Appointment, AppointmentStatus
 from datetime import datetime
 
 appointment_routes = Blueprint('appointment_routes', __name__, url_prefix='/appointment')
@@ -32,59 +32,57 @@ def addAppointment():
 
     return jsonify(new_appointment.serialize()), 200
 
-# TODO: Filter by status, etc
+
 @appointment_routes.route('/<username>', methods=['GET'])
 def getAppointmentsByUser(username):
     user = User.query.filter_by(username=username).first()
     if user is None:
         return jsonify({"error": "User not found"}), 404
 
+    status_filter = request.args.get('status')
     payload = {'appointments': []}
     if user.user_type == UserType.PATIENT:
-        appointments = user.p_appointments
-        for appointment in appointments:
-            other_party = appointment.doctor
-            name = other_party.first_name + " " + other_party.last_name
-            appointment_ser = appointment.serialize()
-            appointment_ser['other_party_name'] = name
-            appointment_ser['other_party_uname'] = other_party.username
-            payload['appointments'].append(appointment_ser)
+        if status_filter:
+            appointments = Appointment.query.filter_by(patient=user, status=status_filter).all()
+        else:
+            appointments = user.p_appointments
     elif user.user_type == UserType.DOCTOR:
-        appointments = user.d_appointments
-        for appointment in appointments:
-            other_party = appointment.patient
-            name = other_party.first_name + " " + other_party.last_name
-            appointment_ser = appointment.serialize()
-            appointment_ser['other_party_name'] = name
-            appointment_ser['other_party_uname'] = other_party.username
-            payload['appointments'].append(appointment_ser)
+        if status_filter:
+            appointments = Appointment.query.filter_by(doctor=user, status=status_filter).all()
+        else:
+            appointments = user.d_appointments
     else:
-        appointments = []
+        appointments = Appointment.query.all()
 
     if not appointments:
         return jsonify({"error": "No appointments found"}), 404
 
+    for appointment in appointments:
+        payload['appointments'].append(appointment.serialize())
+
     return jsonify(payload), 200
 
-# TODO: User authorization checking
-@appointment_routes.route('/updateStatus', methods=['PUT'])
-def updateAppointmentStatus():
+
+@appointment_routes.route('', methods=['PUT'])
+def updateAppointment():
     id = request.args.get('id')
-    status = request.args.get('status')
-    if id is None or status is None:
+    new_status = request.args.get('status')
+    new_note = request.args.get('note')
+    if id is None:
         return jsonify({"error": "Missing request parameters"}), 400
     if not id.isdigit():
         return jsonify({"error": "Invalid id"}), 400
-    if status.isdigit():
-        if int(status) > 2:
-            return jsonify({"error": "Invalid status"}), 400
-    else:
-        return jsonify({"error": "Invalid status"}), 400
 
     appointment = Appointment.query.filter_by(id=int(id)).first()
     if appointment is None:
         return jsonify({"error": "Appointment not found"}), 404
-    appointment.status = int(status)
+
+    if new_status:
+        if new_status not in ['CANCELED', 'ACTIVE', 'COMPLETED']:
+            return jsonify({"error": "Invalid status"}), 400
+        appointment.status = AppointmentStatus[new_status]
+    if new_note:
+        appointment.doctor_notes = new_note
     db.session.commit()
 
     return jsonify(appointment.serialize()), 200

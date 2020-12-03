@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from sqlalchemy.exc import IntegrityError
 from backend.db import db
-from backend.db.models import UserType, User, Specialization, Appointment, Prescription
+from backend.db.models import UserType, User, Specialization, UserStatus
 from datetime import datetime
 
 user_routes = Blueprint('user_routes', __name__, url_prefix='/user')
@@ -10,21 +10,22 @@ user_routes = Blueprint('user_routes', __name__, url_prefix='/user')
 @user_routes.route('/register', methods=['POST'])
 def addUser():
     data = request.get_json()
-    dob = datetime.strptime(data['dob'], '%Y-%m-%d').date()
 
     if data['user_type'] == UserType.PATIENT.name:
+        dob = datetime.strptime(data['dob'], '%Y-%m-%d').date()
         new_user = User(data['email'], data['username'], data['first_name'], data['last_name'], dob,
-                        data['phone_number'], UserType.PATIENT)
+                        data['phone_number'], UserType.PATIENT, UserStatus.APPROVED)
     elif data['user_type'] == UserType.DOCTOR.name:
+        dob = datetime.strptime(data['dob'], '%Y-%m-%d').date()
+        specialization = Specialization.query.filter_by(spec=data['specialization']).first()
+        if specialization is None:
+            return jsonify({"error": "Specialization not found"}), 404
         new_user = User(data['email'], data['username'], data['first_name'], data['last_name'], dob,
-                        data['phone_number'], UserType.DOCTOR)
-        for specialization in data['specializations']:
-            s = Specialization.query.filter_by(name=specialization).first()
-            if s is None:
-                new_spec = Specialization(specialization)
-                new_user.specializations.append(new_spec)
-            else:
-                new_user.specializations.append(s)
+                        data['phone_number'], UserType.DOCTOR, UserStatus.PENDING)
+        new_user.specialization = specialization
+    else:
+        new_user = User(data['email'], data['username'], data['first_name'], data['last_name'], None, None,
+                        UserType.ADMIN, UserStatus.APPROVED)
     new_user.set_password(data['password'])
 
     try:
@@ -79,20 +80,33 @@ def getUserByUsername(username):
             json['other_party_name'] = patient_name
             json['other_party_uname'] = patient.username
             prescriptions_list.append(json)
-        payload['specializations'] = []
-        for specialization in user.specializations:
-            payload['specializations'].append(specialization.name)
 
     payload['appointments'] = appointments_list
     payload['prescriptions'] = prescriptions_list
 
     return jsonify(payload), 200
 
+
 # TODO: Filter by specialization
-@user_routes.route('/getDoctors', methods=['GET'])
-def getDoctors():
+@user_routes.route('/getAllDoctors', methods=['GET'])
+def getAllDoctors():
     doctors = User.query.filter_by(user_type=UserType.DOCTOR).all()
     if doctors is None:
+        return jsonify({"error": "No doctor found"}), 404
+
+    payload = {'doctors': []}
+    for doctor in doctors:
+        payload['doctors'].append(doctor.serialize())
+
+    return jsonify(payload), 200
+
+
+@user_routes.route('/getDoctorBySpecialization', methods=['GET'])
+def getDoctorBySpecialization():
+    spec = request.args.get('spec')
+    specialization = Specialization.query.filter_by(spec=spec).first()
+    doctors = User.query.filter_by(user_type=UserType.DOCTOR, specialization=specialization).all()
+    if not doctors:
         return jsonify({"error": "No doctor found"}), 404
 
     payload = {'doctors': []}
