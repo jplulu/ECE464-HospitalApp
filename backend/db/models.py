@@ -129,18 +129,25 @@ class Appointment(db.Model):
         self.end = end
         self.status = status
 
-    def serialize(self):
-        return {
-            "id": self.id,
-            "doctor": self.doctor.serialize(),
-            "patient": self.patient.serialize(),
-            "description": self.description,
-            "doctor_notes": self.doctor_notes,
-            "date": self.date.strftime("%Y-%m-%d"),
-            "start": self.start.strftime("%H:%M"),
-            "end": self.end.strftime("%H:%M"),
-            "status": self.status.name
-        }
+    def serialize(self, user_type):
+        payload = {
+                "id": self.id,
+                "description": self.description,
+                "doctor_notes": self.doctor_notes,
+                "date": self.date.strftime("%Y-%m-%d"),
+                "start": self.start.strftime("%H:%M"),
+                "end": self.end.strftime("%H:%M"),
+                "status": self.status.name
+            }
+        if user_type == UserType.DOCTOR:
+            payload['patient'] = self.patient.serialize()
+        elif user_type == UserType.PATIENT:
+            payload['doctor'] = self.doctor.serialize()
+        else:
+            payload['patient'] = self.patient.serialize()
+            payload['doctor'] = self.doctor.serialize()
+
+        return payload
 
 
 class Prescription(db.Model):
@@ -163,16 +170,24 @@ class Prescription(db.Model):
         self.dosage = dosage
         self.status = status
 
-    def serialize(self):
-        return {
+    def serialize(self, user_type):
+        payload = {
             "id": self.id,
-            "patient": self.patient.serialize(),
-            "doctor": self.doctor.serialize(),
             "drug": self.drug,
             "date": self.date.strftime("%Y-%m-%d"),
             "dosage": self.dosage,
             "status": self.status.name
         }
+
+        if user_type == UserType.DOCTOR:
+            payload['patient'] = self.patient.serialize()
+        elif user_type == UserType.PATIENT:
+            payload['doctor'] = self.doctor.serialize()
+        else:
+            payload['patient'] = self.patient.serialize()
+            payload['doctor'] = self.doctor.serialize()
+
+        return payload
 
 
 if __name__ == "__main__":

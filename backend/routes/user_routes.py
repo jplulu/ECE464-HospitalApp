@@ -50,36 +50,16 @@ def getUserByUsername(username):
         appointments = user.p_appointments
         prescriptions = user.p_prescriptions
         for appointment in appointments:
-            doctor = appointment.doctor
-            doctor_name = doctor.first_name + " " + doctor.last_name
-            json = appointment.serialize()
-            json['other_party_name'] = doctor_name
-            json['other_party_uname'] = doctor.username
-            appointments_list.append(json)
+            appointments_list.append(appointment.serialize(UserType.PATIENT))
         for prescription in prescriptions:
-            doctor = prescription.doctor
-            doctor_name = doctor.first_name + " " + doctor.last_name
-            json = prescription.serialize()
-            json['other_party_name'] = doctor_name
-            json['other_party_uname'] = doctor.username
-            prescriptions_list.append(json)
+            prescriptions_list.append(prescription.serialize(UserType.PATIENT))
     elif user.user_type == UserType.DOCTOR:
         appointments = user.d_appointments
         prescriptions = user.d_prescriptions
         for appointment in appointments:
-            patient = appointment.patient
-            patient_name = patient.first_name + " " + patient.last_name
-            json = appointment.serialize()
-            json['other_party_name'] = patient_name
-            json['other_party_uname'] = patient.username
-            appointments_list.append(json)
+            appointments_list.append(appointment.serialize(UserType.DOCTOR))
         for prescription in prescriptions:
-            patient = prescription.patient
-            patient_name = patient.first_name + " " + patient.last_name
-            json = prescription.serialize()
-            json['other_party_name'] = patient_name
-            json['other_party_uname'] = patient.username
-            prescriptions_list.append(json)
+            prescriptions_list.append(prescription.serialize(UserType.DOCTOR))
 
     payload['appointments'] = appointments_list
     payload['prescriptions'] = prescriptions_list
@@ -87,7 +67,6 @@ def getUserByUsername(username):
     return jsonify(payload), 200
 
 
-# TODO: Filter by specialization
 @user_routes.route('/getAllDoctors', methods=['GET'])
 def getAllDoctors():
     doctors = User.query.filter_by(user_type=UserType.DOCTOR).all()
@@ -105,7 +84,9 @@ def getAllDoctors():
 def getDoctorBySpecialization():
     spec = request.args.get('spec')
     specialization = Specialization.query.filter_by(spec=spec).first()
-    doctors = User.query.filter_by(user_type=UserType.DOCTOR, specialization=specialization).all()
+    if specialization is None:
+        return jsonify({"error": "Specialization not found"}), 404
+    doctors = specialization.doctors
     if not doctors:
         return jsonify({"error": "No doctor found"}), 404
 
