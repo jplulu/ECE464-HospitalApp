@@ -6,6 +6,19 @@ from backend.db.models import Specialization
 specialization_routes = Blueprint('specialization_routes', __name__, url_prefix='/specialization')
 
 
+@specialization_routes.route('', methods=['GET'])
+def getAllSpecialization():
+    specializations = Specialization.query.all()
+    if specializations is None:
+        return jsonify({"error": "No specialization found"}), 404
+
+    payload = {'specializations': []}
+    for specialization in specializations:
+        payload['specializations'].append(specialization.serialize())
+
+    return jsonify(payload), 200
+
+
 @specialization_routes.route('', methods=['POST'])
 def addSpecialization():
     spec = request.args.get('spec')
