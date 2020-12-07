@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from sqlalchemy.exc import IntegrityError
 from backend.db import db
-from backend.db.models import UserType, User, Specialization, Appointment, Prescription
+from backend.db.models import UserType, User, Prescription, PrescriptionStatus
 from datetime import datetime
 
 prescription_routes = Blueprint('prescription_routes', __name__, url_prefix='/prescription')
@@ -31,37 +31,33 @@ def addPrescription():
 
     return jsonify(new_prescription.serialize()), 200
 
-# TODO: Filter by status, etc
+
 @prescription_routes.route('/<username>', methods=['GET'])
 def getPrescriptionsByUser(username):
     user = User.query.filter_by(username=username).first()
     if user is None:
         return jsonify({"error": "User not found"}), 404
 
+    status_filter = request.args.get('status')
     payload = {'prescriptions': []}
     if user.user_type == UserType.PATIENT:
-        prescriptions = user.p_prescriptions
-        for prescription in prescriptions:
-            other_party = prescription.doctor
-            name = other_party.first_name + " " + other_party.last_name
-            prescription_ser = prescription.serialize()
-            prescription_ser['other_party_name'] = name
-            prescription_ser['other_party_uname'] = other_party.username
-            payload['prescriptions'].append(prescription_ser)
+        if status_filter:
+            prescriptions = Prescription.query.filter_by(patient=user, status=status_filter).all()
+        else:
+            prescriptions = user.p_prescriptions
     elif user.user_type == UserType.DOCTOR:
-        prescriptions = user.d_prescriptions
-        for prescription in prescriptions:
-            other_party = prescription.patient
-            name = other_party.first_name + " " + other_party.last_name
-            prescription_ser = prescription.serialize()
-            prescription_ser['other_party_name'] = name
-            prescription_ser['other_party_uname'] = other_party.username
-            payload['prescriptions'].append(prescription_ser)
+        if status_filter is not None:
+            prescriptions = Prescription.query.filter_by(doctor=user, status=status_filter).all()
+        else:
+            prescriptions = user.d_prescriptions
     else:
-        prescriptions = []
+        prescriptions = Prescription.query.all()
 
     if not prescriptions:
         return jsonify({"error": "No prescriptions found"}), 404
+
+    for prescription in prescriptions:
+        payload['prescriptions'].append(prescription.serialize())
 
     return jsonify(payload), 200
 
@@ -69,21 +65,18 @@ def getPrescriptionsByUser(username):
 @prescription_routes.route('/updateStatus', methods=['PUT'])
 def updatePrescriptionStatus():
     id = request.args.get('id')
-    status = request.args.get('status')
-    if id is None or status is None:
+    new_status = request.args.get('status')
+    if id is None or new_status is None:
         return jsonify({"error": "Missing request parameters"}), 400
     if not id.isdigit():
         return jsonify({"error": "Invalid id"}), 400
-    if status.isdigit():
-        if int(status) > 2:
-            return jsonify({"error": "Invalid status"}), 400
-    else:
+    if new_status not in ['ACTIVE', 'INACTIVE']:
         return jsonify({"error": "Invalid status"}), 400
 
     prescription = Prescription.query.filter_by(id=int(id)).first()
     if prescription is None:
         return jsonify({"error": "Prescription not found"}), 404
-    prescription.status = int(status)
+    prescription.status = PrescriptionStatus[new_status]
     db.session.commit()
 
     return jsonify(prescription.serialize()), 200

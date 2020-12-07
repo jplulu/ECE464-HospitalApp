@@ -1,7 +1,7 @@
-from flask import Blueprint, request, jsonify, render_template
+from flask import Blueprint, request, jsonify
 from sqlalchemy.exc import IntegrityError
 from backend.db import db
-from backend.db.models import UserType, User, Specialization, Appointment, Prescription,specializations
+from backend.db.models import UserType, User, Specialization, UserStatus
 from datetime import datetime
 
 user_routes = Blueprint('user_routes', __name__, url_prefix='/user')
@@ -10,21 +10,22 @@ user_routes = Blueprint('user_routes', __name__, url_prefix='/user')
 @user_routes.route('/register', methods=['POST'])
 def addUser():
     data = request.get_json()
-    dob = datetime.strptime(data['dob'], '%Y-%m-%d').date()
 
     if data['user_type'] == UserType.PATIENT.name:
+        dob = datetime.strptime(data['dob'], '%Y-%m-%d').date()
         new_user = User(data['email'], data['username'], data['first_name'], data['last_name'], dob,
-                        data['phone_number'], UserType.PATIENT)
+                        data['phone_number'], UserType.PATIENT, UserStatus.APPROVED)
     elif data['user_type'] == UserType.DOCTOR.name:
+        dob = datetime.strptime(data['dob'], '%Y-%m-%d').date()
+        specialization = Specialization.query.filter_by(spec=data['specialization']).first()
+        if specialization is None:
+            return jsonify({"error": "Specialization not found"}), 404
         new_user = User(data['email'], data['username'], data['first_name'], data['last_name'], dob,
-                        data['phone_number'], UserType.DOCTOR)
-        for specialization in data['specializations']:
-            s = Specialization.query.filter_by(name=specialization).first()
-            if s is None:
-                new_spec = Specialization(specialization)
-                new_user.specializations.append(new_spec)
-            else:
-                new_user.specializations.append(s)
+                        data['phone_number'], UserType.DOCTOR, UserStatus.PENDING)
+        new_user.specialization = specialization
+    else:
+        new_user = User(data['email'], data['username'], data['first_name'], data['last_name'], None, None,
+                        UserType.ADMIN, UserStatus.APPROVED)
     new_user.set_password(data['password'])
 
     try:
@@ -49,59 +50,48 @@ def getUserByUsername(username):
         appointments = user.p_appointments
         prescriptions = user.p_prescriptions
         for appointment in appointments:
-            doctor = appointment.doctor
-            doctor_name = doctor.first_name + " " + doctor.last_name
-            json = appointment.serialize()
-            json['other_party_name'] = doctor_name
-            json['other_party_uname'] = doctor.username
-            appointments_list.append(json)
+            appointments_list.append(appointment.serialize(UserType.PATIENT))
         for prescription in prescriptions:
-            doctor = prescription.doctor
-            doctor_name = doctor.first_name + " " + doctor.last_name
-            json = prescription.serialize()
-            json['other_party_name'] = doctor_name
-            json['other_party_uname'] = doctor.username
-            prescriptions_list.append(json)
+            prescriptions_list.append(prescription.serialize(UserType.PATIENT))
     elif user.user_type == UserType.DOCTOR:
         appointments = user.d_appointments
         prescriptions = user.d_prescriptions
         for appointment in appointments:
-            patient = appointment.patient
-            patient_name = patient.first_name + " " + patient.last_name
-            json = appointment.serialize()
-            json['other_party_name'] = patient_name
-            json['other_party_uname'] = patient.username
-            appointments_list.append(json)
+            appointments_list.append(appointment.serialize(UserType.DOCTOR))
         for prescription in prescriptions:
-            patient = prescription.patient
-            patient_name = patient.first_name + " " + patient.last_name
-            json = prescription.serialize()
-            json['other_party_name'] = patient_name
-            json['other_party_uname'] = patient.username
-            prescriptions_list.append(json)
-        payload['specializations'] = []
-        for specialization in user.specializations:
-            payload['specializations'].append(specialization.name)
+            prescriptions_list.append(prescription.serialize(UserType.DOCTOR))
 
     payload['appointments'] = appointments_list
     payload['prescriptions'] = prescriptions_list
 
     return jsonify(payload), 200
 
-# TODO: Filter by specialization
-@user_routes.route('/getDoctors', methods=['GET'])
-def getDoctors():
-    # doctors = User.query.filter_by(user_type=UserType.DOCTOR).\
-    #     join(specializations, specializations.c.doctor_id == User.id).join(Specialization, specializations.c.specialization_id == Specialization.id).\
-    #     add_columns(User.email, User.first_name, User.last_name, User.phone_number, Specialization.name.label("spec_name"))
-    doctors = db.session.query(User.email, User.first_name, User.last_name, User.phone_number, Specialization.name.label("spec_name")).\
-        join(specializations, specializations.c.doctor_id == User.id).join(Specialization, specializations.c.specialization_id == Specialization.id)
-    spec = db.session.query(Specialization.name)
+
+@user_routes.route('/getAllDoctors', methods=['GET'])
+def getAllDoctors():
+    doctors = User.query.filter_by(user_type=UserType.DOCTOR).all()
     if doctors is None:
         return jsonify({"error": "No doctor found"}), 404
 
-    payload = []
+    payload = {'doctors': []}
     for doctor in doctors:
-        payload.append(doctor)
-    return render_template("showdoctor.html", doc_list=payload, specializations=spec)
-    # return jsonify(payload), 200
+        payload['doctors'].append(doctor.serialize())
+
+    return jsonify(payload), 200
+
+
+@user_routes.route('/getDoctorBySpecialization', methods=['GET'])
+def getDoctorBySpecialization():
+    spec = request.args.get('spec')
+    specialization = Specialization.query.filter_by(spec=spec).first()
+    if specialization is None:
+        return jsonify({"error": "Specialization not found"}), 404
+    doctors = specialization.doctors
+    if not doctors:
+        return jsonify({"error": "No doctor found"}), 404
+
+    payload = {'doctors': []}
+    for doctor in doctors:
+        payload['doctors'].append(doctor.serialize())
+
+    return jsonify(payload), 200
