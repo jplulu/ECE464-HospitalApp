@@ -13,7 +13,7 @@ def login():
     password = request.args.get('password')
     user_type = request.args.get('user_type')
 
-    user = User.query.filter_by(email=email, user_type=UserType[user_type]).first()
+    user = User.query.filter_by(email=email, user_type=user_type).first()
     if user is not None and user.check_password(password):
         return jsonify({
             'id': user.id,
@@ -65,30 +65,20 @@ def getUserByUsername():
     return jsonify(user.serialize()), 200
 
 
-@user_routes.route('/getAllDoctors', methods=['GET'])
-def getAllDoctors():
+@user_routes.route('/getDoctors', methods=['GET'])
+def getDoctors():
+    spec_filter = request.args.get('spec')
     status_filter = request.args.get('status')
+
+    doctors = User.query.filter_by(user_type=UserType.DOCTOR)
     if status_filter:
-        doctors = User.query.filter_by(user_type=UserType.DOCTOR, user_status=status_filter).all()
-    else:
-        doctors = User.query.filter_by(user_type=UserType.DOCTOR).all()
-    if doctors is None:
-        return jsonify({"error": "No doctor found"}), 404
-
-    payload = {'doctors': []}
-    for doctor in doctors:
-        payload['doctors'].append(doctor.serialize())
-
-    return jsonify(payload), 200
-
-
-@user_routes.route('/getDoctorBySpecialization', methods=['GET'])
-def getDoctorBySpecialization():
-    spec = request.args.get('spec')
-    specialization = Specialization.query.filter_by(spec=spec).first()
-    if specialization is None:
-        return jsonify({"error": "Specialization not found"}), 404
-    doctors = specialization.doctors
+        doctors = doctors.filter_by(user_status=status_filter)
+    if spec_filter:
+        specialization = Specialization.query.filter_by(spec=spec_filter).first()
+        if specialization is None:
+            return jsonify({"error": "Specialization not found"}), 404
+        doctors = doctors.filter_by(specialization=specialization)
+    doctors = doctors.all()
     if not doctors:
         return jsonify({"error": "No doctor found"}), 404
 

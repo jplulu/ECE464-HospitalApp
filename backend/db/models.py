@@ -18,7 +18,7 @@ class UserStatus(enum.Enum):
 
 
 class AppointmentStatus(enum.Enum):
-    CANCELLED = 0
+    CANCELED = 0
     PENDING = 1
     ACTIVE = 2
     COMPLETE = 3
