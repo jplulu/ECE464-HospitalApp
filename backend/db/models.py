@@ -14,6 +14,7 @@ class UserType(enum.Enum):
 class UserStatus(enum.Enum):
     PENDING = 0
     APPROVED = 1
+    REJECTED = 2
 
 
 class AppointmentStatus(enum.Enum):
