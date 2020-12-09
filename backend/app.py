@@ -13,9 +13,8 @@ app.register_blueprint(specialization_routes)
 # Need to make post request on postman first before this runs
 @app.before_first_request
 def create_table():
-    print("test")
     db.create_all()
-    populate.populate()
+    # populate.populate()
 
 
 

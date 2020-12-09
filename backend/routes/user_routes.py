@@ -76,7 +76,6 @@ def getAllDoctors():
     payload = {'doctors': []}
     for doctor in doctors:
         payload['doctors'].append(doctor.serialize())
-
     return jsonify(payload), 200
 
 

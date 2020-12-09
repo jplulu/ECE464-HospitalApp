@@ -16,9 +16,8 @@ dob_range = [datetime.strptime('1/1/1950 1:30 PM', '%m/%d/%Y %I:%M %p'),
 
 def create_users(num_entries):
     user_arr, email_arr, pw_arr, fname_arr, \
-    lname_arr, dob_arr, pnum_arr, usertype_arr, uname_arr = ([] for i in range(9))
+    lname_arr, dob_arr, pnum_arr, usertype_arr, uname_arr, userstat_arr = ([] for i in range(10))
     usertype_weighting = [models.UserType.PATIENT] * 100 + [models.UserType.DOCTOR] * 13 + [models.UserType.ADMIN] * 3
-
     def random_date(start, end):
         # https://stackoverflow.com/questions/553303/generate-a-random-date-between-two-other-dates
         delta = end - start
@@ -38,12 +37,14 @@ def create_users(num_entries):
         fname_arr.append(first_name)
         lname_arr.append(last_name)
         usertype_arr.append(choice(usertype_weighting))
+        userstat_arr.append(choice([models.UserStatus.APPROVED, models.UserStatus.PENDING]))
         pnum_arr.append(phone_number)
 
-    ret = [email_arr, uname_arr, fname_arr, lname_arr, dob_arr, pnum_arr, usertype_arr]
+    ret = [email_arr, uname_arr, fname_arr, lname_arr, dob_arr, pnum_arr, usertype_arr, userstat_arr]
 
     for i in range(num_entries):
-        user_arr.append(models.User(ret[0][i], ret[1][i],ret[2][i],ret[3][i],ret[4][i],ret[5][i],ret[6][i]))
+        new_usr = models.User(ret[0][i], ret[1][i],ret[2][i],ret[3][i],ret[4][i],ret[5][i],ret[6][i], ret[7][i])
+        user_arr.append(new_usr)
     return user_arr
 
 def create_specialization():
@@ -105,7 +106,7 @@ def create_prescription(patients, doctors):
 
 
 def populate():
-    e = create_engine("sqlite:///db/test.db")
+    e = create_engine('mysql+pymysql:///hospital')
     conn = e.connect()
     session = sessionmaker(bind=e)
     s = session()
@@ -119,11 +120,12 @@ def populate():
     # Populate Users
     usr_arr = create_users(100)
     spec = s.query(models.Specialization).all()
+    print(spec)
     for usr in usr_arr:
         usr.set_password(secrets.token_urlsafe(16))
         # For doctors, select a specialization from pre established table
         if usr.user_type == models.UserType.DOCTOR:
-            usr.specializations.append(choice(spec))
+            usr.specialization = (choice(spec))
         s.add(usr)
     s.commit()
     # Populate Appointments
@@ -136,4 +138,5 @@ def populate():
     for pres in create_prescription(pat, doc):
         s.add(pres)
     s.commit()
-
+if __name__ == '__main__':
+    populate()
