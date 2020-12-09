@@ -7,6 +7,24 @@ from datetime import datetime
 user_routes = Blueprint('user_routes', __name__, url_prefix='/user')
 
 
+@user_routes.route('/login', methods=['POST'])
+def login():
+    email = request.args.get('email')
+    password = request.args.get('password')
+    user_type = request.args.get('user_type')
+
+    user = User.query.filter_by(email=email, user_type=UserType[user_type]).first()
+    if user is not None and user.check_password(password):
+        return jsonify({
+            'id': user.id,
+            'username': user.username,
+            'user_type': user.user_type.name,
+            'user_status': user.user_status.name
+        }), 200
+
+    return jsonify({"error": "Login failed"}), 401
+
+
 @user_routes.route('/register', methods=['POST'])
 def addUser():
     data = request.get_json()
@@ -37,39 +55,23 @@ def addUser():
     return jsonify(new_user.serialize()), 200
 
 
-@user_routes.route('/<username>', methods=['GET'])
-def getUserByUsername(username):
+@user_routes.route('', methods=['GET'])
+def getUserByUsername():
+    username = request.args.get('username')
     user = User.query.filter_by(username=username).first()
     if user is None:
         return jsonify({"error": "User not found"}), 404
 
-    payload = user.serialize()
-    appointments_list = []
-    prescriptions_list = []
-    if user.user_type == UserType.PATIENT:
-        appointments = user.p_appointments
-        prescriptions = user.p_prescriptions
-        for appointment in appointments:
-            appointments_list.append(appointment.serialize(UserType.PATIENT))
-        for prescription in prescriptions:
-            prescriptions_list.append(prescription.serialize(UserType.PATIENT))
-    elif user.user_type == UserType.DOCTOR:
-        appointments = user.d_appointments
-        prescriptions = user.d_prescriptions
-        for appointment in appointments:
-            appointments_list.append(appointment.serialize(UserType.DOCTOR))
-        for prescription in prescriptions:
-            prescriptions_list.append(prescription.serialize(UserType.DOCTOR))
-
-    payload['appointments'] = appointments_list
-    payload['prescriptions'] = prescriptions_list
-
-    return jsonify(payload), 200
+    return jsonify(user.serialize()), 200
 
 
 @user_routes.route('/getAllDoctors', methods=['GET'])
 def getAllDoctors():
-    doctors = User.query.filter_by(user_type=UserType.DOCTOR).all()
+    status_filter = request.args.get('status')
+    if status_filter:
+        doctors = User.query.filter_by(user_type=UserType.DOCTOR, user_status=status_filter).all()
+    else:
+        doctors = User.query.filter_by(user_type=UserType.DOCTOR).all()
     if doctors is None:
         return jsonify({"error": "No doctor found"}), 404
 
@@ -94,3 +96,24 @@ def getDoctorBySpecialization():
         payload['doctors'].append(doctor.serialize())
 
     return jsonify(payload), 200
+
+
+@user_routes.route('', methods=['PUT'])
+def updateUser():
+    username = request.args.get('username')
+    new_status = request.args.get('status')
+
+    if username is None:
+        return jsonify({"error": "Missing request parameters"}), 400
+
+    user = User.query.filter_by(username=username).first()
+    if user is None:
+        return jsonify({"error": "User not found"}), 404
+
+    if new_status:
+        if new_status not in ['PENDING', 'APPROVED', 'REJECTED']:
+            return jsonify({"error": "Invalid status"}), 400
+        user.user_status = new_status
+    db.session.commit()
+
+    return jsonify(user.serialize()), 200
