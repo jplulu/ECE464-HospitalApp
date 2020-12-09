@@ -8,6 +8,9 @@ class Login extends Component {
 			email: "",
 			password: "",
 			user_type: "PATIENT",
+			emailError: "",
+			passwordError: "",
+			responseError: "",
 		};
 	}
 
@@ -17,29 +20,71 @@ class Login extends Component {
 		});
 	};
 
+	validate = () => {
+		const { email, password } = this.state;
+		let emailError = "";
+		let passwordError = "";
+		// if (email === "" || !email.includes("@")) {
+		// 	emailError = "Invalid email";
+		// }
+		if (email === "") {
+			emailError = "Must not be empty";
+		}
+		if (password === "") {
+			passwordError = "Must not be empty";
+		}
+		if (emailError || passwordError) {
+			this.setState({
+				emailError: emailError,
+				passwordError: passwordError,
+			});
+			return false;
+		}
+		return true;
+	};
+
 	handleSubmit = (e) => {
 		e.preventDefault();
-		console.log(this.state);
-		//axios.defaults.adapter = require("axios/lib/adapters/http");
-		axios
-			.post("http://localhost:5000/user/login", null, {
-				params: {
-					email: this.state.email,
-					password: this.state.password,
-					user_type: this.state.user_type,
-				},
-			})
-			.then((response) => {
-				const user = JSON.stringify(response.data);
-				localStorage.setItem("user", user);
-			})
-			.catch((error) => {
-				console.log(error.response.data.error);
-			});
+		this.setState({
+			emailError: "",
+			passwordError: "",
+			responseError: "",
+		});
+		const isValid = this.validate();
+		if (isValid) {
+			// console.log(this.state);
+			axios
+				.post("http://localhost:5000/user/login", null, {
+					params: {
+						email: this.state.email,
+						password: this.state.password,
+						user_type: this.state.user_type,
+					},
+				})
+				.then((response) => {
+					const user = JSON.stringify(response.data);
+					localStorage.setItem("user", user);
+					window.location.href = "http://localhost:3000/";
+				})
+				.catch((error) => {
+					if (error.response) {
+						this.setState({
+							responseError: error.response.data.error,
+						});
+					}
+				});
+		}
 	};
 
 	render() {
-		const { email, password, user_type } = this.state;
+		const {
+			email,
+			password,
+			user_type,
+			emailError,
+			passwordError,
+			responseError,
+		} = this.state;
 		return (
 			<form onSubmit={this.handleSubmit}>
 				<div>
@@ -62,6 +107,7 @@ class Login extends Component {
 						onChange={this.handleChange}
 					/>
 				</div>
+				<div style={{ color: "red" }}>{emailError}</div>
 				<div>
 					<input
 						type="password"
@@ -71,6 +117,8 @@ class Login extends Component {
 						onChange={this.handleChange}
 					/>
 				</div>
+				<div style={{ color: "red" }}>{passwordError}</div>
+				<div style={{ color: "red" }}>{responseError}</div>
 				<button type="submit">Login</button>
 			</form>
 		);
