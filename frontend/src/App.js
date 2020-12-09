@@ -1,21 +1,12 @@
-import logo from './logo.svg';
-import './App.css';
-import {home} from './components/Greet'
-import Welcome from "./components/Welcome";
-import {BrowserRouter as Router, Route, Switch} from 'react-router-dom';
+import "./App.css";
+import Login from "./components/Login";
 
 function App() {
-  return (
-      <Router>
-        <div className="container">
-          <Switch>
-            <Route path="/getAllDoctors" exact component={home}/>
-          </Switch>
-        </div>
-      </Router>
-  );
+	return (
+		<div>
+			<Login />
+		</div>
+	);
 }
-
-
 
 export default App;
