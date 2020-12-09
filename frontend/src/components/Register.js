@@ -1,8 +1,13 @@
 import React, { Component } from "react";
+import Nav from "./Nav";
 
 class Register extends Component {
 	render() {
-		return <div></div>;
+		return (
+			<div>
+				<Nav></Nav>
+			</div>
+		);
 	}
 }
 

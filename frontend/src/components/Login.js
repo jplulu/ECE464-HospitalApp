@@ -24,8 +24,11 @@ class Login extends Component {
 		const { email, password } = this.state;
 		let emailError = "";
 		let passwordError = "";
-		if (email === "" || !email.includes("@")) {
-			emailError = "Invalid email";
+		// if (email === "" || !email.includes("@")) {
+		// 	emailError = "Invalid email";
+		// }
+		if (email === "") {
+			emailError = "Must not be empty";
 		}
 		if (password === "") {
 			passwordError = "Must not be empty";
@@ -61,11 +64,14 @@ class Login extends Component {
 				.then((response) => {
 					const user = JSON.stringify(response.data);
 					localStorage.setItem("user", user);
+					window.location.href = "http://localhost:3000/";
 				})
 				.catch((error) => {
-					this.setState({
-						responseError: error.response.data.error,
-					});
+					if (error.response) {
+						this.setState({
+							responseError: error.response.data.error,
+						});
+					}
 				});
 		}
 	};
