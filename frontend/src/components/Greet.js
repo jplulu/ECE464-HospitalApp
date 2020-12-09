@@ -1,7 +1,7 @@
 import React, {Component} from 'react'
 import {  Table } from "semantic-ui-react";
 
-export class home extends Component{
+export class alldoctor extends Component{
     constructor() {
         super();
         this.state = { doctors: []}
@@ -21,7 +21,7 @@ export class home extends Component{
     render() {
         return (
           <div>
-        <h1>Movie List</h1>
+        <h1>Doctor List</h1>
             <Table>
                 <tr>
                   {this.state.doctors.map(doctor =>
@@ -29,7 +29,7 @@ export class home extends Component{
                           <td>{doctor.email}</td>
                           <td>{doctor.first_name}</td>
                           <td>{doctor.last_name}</td>
-                          <td>{doctor.user_type}</td>
+                          <td>{doctor.specialization}</td>
                       </tr>
                   )}
                 </tr>
