@@ -135,7 +135,6 @@ class Appointment(db.Model):
                 "doctor_notes": self.doctor_notes,
                 "date": self.date.strftime("%Y-%m-%d"),
                 "start": self.start.strftime("%H:%M"),
-                "end": self.end.strftime("%H:%M"),
                 "status": self.status.name
             }
         if user_type == UserType.DOCTOR:
