@@ -1,9 +1,11 @@
 import React, { Component } from "react";
 import axios from "axios";
 
-export class Login extends Component {
-	constructor() {
-		super();
+
+class Login extends Component {
+	constructor(props) {
+		super(props);
+
 		this.state = {
 			email: "",
 			password: "",
@@ -88,6 +90,8 @@ export class Login extends Component {
 		return (
 			<form onSubmit={this.handleSubmit}>
 				<div>
+					<h1>Login</h1>
+					<label>Role </label>
 					<select
 						name="user_type"
 						value={user_type}
@@ -120,6 +124,10 @@ export class Login extends Component {
 				<div style={{ color: "red" }}>{passwordError}</div>
 				<div style={{ color: "red" }}>{responseError}</div>
 				<button type="submit">Login</button>
+				<p>
+					Don't have an account? Sign up{" "}
+					<a href="http://localhost:3000/register">here</a>
+				</p>
 			</form>
 		);
 	}

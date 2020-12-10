@@ -18,7 +18,7 @@ def addAppointment():
         return jsonify({"error": "Doctor not found"}), 400
     date = datetime.strptime(data['date'], '%Y-%m-%d').date()
     start = datetime.strptime(data['start'], '%H:%M').time()
-    # end = datetime.strptime(data['end'], '%H:%M').time()
+    
 
     new_appointment = Appointment(data['description'], date, start)
     new_appointment.patient = patient

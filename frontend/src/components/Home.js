@@ -6,8 +6,7 @@ import Nav from "./Nav";
 class Home extends Component {
 	componentDidMount() {
 		if (loggedIn()) {
-			const user_type = JSON.parse(localStorage.getItem("user"))
-				.user_type;
+			const user_type = JSON.parse(localStorage.getItem("user")).user_type;
 			if (user_type === "ADMIN") {
 				this.props.history.push("/admin");
 			} else if (user_type === "PATIENT") {
