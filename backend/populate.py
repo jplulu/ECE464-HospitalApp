@@ -30,8 +30,8 @@ def create_users(num_entries):
         phone_number = ''.join(str(randint(0, 9)) for _ in range(10))
 
         dob_arr.append(dob)
-        email_arr.append(first_name + last_name + "@example.com")
-        uname_arr.append(first_name + last_name)
+        email_arr.append(first_name + last_name + str(i) + "@example.com")
+        uname_arr.append(first_name + last_name + str(i))
         fname_arr.append(first_name)
         lname_arr.append(last_name)
         usertype_arr.append(choice(usertype_weighting))
@@ -42,13 +42,14 @@ def create_users(num_entries):
 
     for i in range(num_entries):
         new_usr = models.User(ret[0][i], ret[1][i], ret[2][i], ret[3][i], ret[4][i], ret[5][i], ret[6][i], ret[7][i])
+        print(ret[0][i])
         user_arr.append(new_usr)
     return user_arr
 
 
 def create_specialization():
     spec_arr = []
-    specializations = ["This", "That", "Those", "Whose", "What"]
+    specializations = open("specializations.txt").read().splitlines()
     for spec in specializations:
         spec_arr.append(models.Specialization(spec))
 
@@ -98,7 +99,7 @@ def create_prescription(patients, doctors):
     for patient in patients:
         if randint(1, 10) > 7:
             drug = choice(drug_list)
-            dosage = str(randint(1, 20)) + " mg"
+            dosage = str(randint(1, 20)) + " mg per day"
             date = rand_date(date_range)
             prescription = models.Prescription(drug=drug, date=date, dosage=dosage)
             prescription.patient = patient
@@ -109,7 +110,7 @@ def create_prescription(patients, doctors):
 
 
 def populate():
-    e = create_engine('mysql://root:password@localhost/hospital')
+    e = create_engine('mysql+pymysql:///hospital')
     conn = e.connect()
     session = sessionmaker(bind=e)
     s = session()
@@ -121,11 +122,11 @@ def populate():
     except exc.IntegrityError:
         s.rollback()
     # Populate Users
-    usr_arr = create_users(100)
+    usr_arr = create_users(1000)
     spec = s.query(models.Specialization).all()
-    print(spec)
     for usr in usr_arr:
-        usr.set_password(secrets.token_urlsafe(16))
+        # usr.set_password(secrets.token_urlsafe(16))
+        usr.set_password("1")
         # For doctors, select a specialization from pre established table
         if usr.user_type == models.UserType.DOCTOR:
             usr.specialization = (choice(spec))

@@ -9,6 +9,7 @@ import Admin from "./components/Admin";
 import Patient from "./components/Patient";
 import Doctor from "./components/Doctor";
 import Nav from "./components/Nav"
+import {Patient_appointment} from "./components/Patient"
 
 function App() {
 	return (
@@ -21,9 +22,10 @@ function App() {
 					<Route path="/patient" exact component={Patient}/>
 					<Route path="/doctor" exact component={Doctor}/>
 					<Route path="/login" exact component={Login}/>
-          <Route path="/getDoctorsadmin" exact component={getdoc_admin}/>
-					<Route path="/getDoctorspat" exact component={getdoc_patient}/>
-					<Route path="/addSpec" exact component={addspec_admin}/>
+          			<Route path="/doctor/getDoctors" exact component={getdoc_admin}/>
+					<Route path="/patient/getDoctors" exact component={getdoc_patient}/>
+					<Route path="/admin/addSpec" exact component={addspec_admin}/>
+					<Route path="/patient/appointments" exact component={Patient_appointment}/>
 				</Switch>
 		</Router>
 	);
