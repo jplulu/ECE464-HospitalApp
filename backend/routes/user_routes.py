@@ -92,8 +92,6 @@ def getDoctors():
 def updateUser():
     username = request.args.get('username')
     new_status = request.args.get('status')
-    print(username)
-    print(new_status)
     if username is None:
         return jsonify({"error": "Missing request parameters"}), 400
 
