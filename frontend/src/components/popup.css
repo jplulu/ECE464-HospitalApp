@@ -1,7 +1,9 @@
 .modal {
 	font-size: 12px;
-	background: blueviolet;
-	width: 100%; /* Full width */
+	background: coral;
+	width: 48%; /* Full width */
+	text-align: center;
+	margin: auto;
 }
 .modal > .header {
 	width: 100%;

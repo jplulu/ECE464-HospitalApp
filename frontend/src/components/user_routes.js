@@ -335,7 +335,10 @@ export class getdoc_patient extends Component {
 													close();
 												}}
 											>
-												<input
+												<h3>New Appointment</h3>
+												<textarea
+													cols="30"
+													rows="10"
 													type="text"
 													name="description"
 													placeholder="description"
