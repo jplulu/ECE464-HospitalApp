@@ -3,18 +3,10 @@ import Nav from "./Nav";
 import axios from "axios";
 import loggedIn from "./loggedIn";
 import {Table} from "semantic-ui-react";
+import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
+import 'react-tabs/style/react-tabs.css';
 
-class Patient extends Component {
-	constructor() {
-		super();
-	}
-
-	render() {
-		return <div></div>;
-	}
-}
-
-export class Patient_appointment extends Component{
+class Patient extends Component{
 	constructor(props) {
 		super(props);
 		this.state = {
@@ -232,6 +224,9 @@ export class Patient_appointment extends Component{
 						<td>
 							<b>Status</b>
 						</td>
+						<td>
+							<b>Doctor Name</b>
+						</td>
 					</tr>
 					{this.state.prescriptions.map((prescription) => (
 						<tr key={prescription.id}>
@@ -239,6 +234,7 @@ export class Patient_appointment extends Component{
 							<td>{prescription.date}</td>
 							<td>{prescription.dosage}</td>
 							<td>{prescription.status}</td>
+							<td>{prescription.doctor.first_name + " " +prescription.doctor.last_name }</td>
 						</tr>
 					))}
 				</tbody>
@@ -246,7 +242,21 @@ export class Patient_appointment extends Component{
 			</div>
 		)
 
-		return <div>{appointmentsMarkup}{prescriptionMarkup}</div>;
+		return <div>
+			<Tabs>
+				<TabList>
+				  <Tab>Appointment</Tab>
+				  <Tab>Prescriptions</Tab>
+				</TabList>
+
+				<TabPanel>
+				  <div>{appointmentsMarkup}</div>
+				</TabPanel>
+				<TabPanel>
+				  <div>{prescriptionMarkup}</div>
+				</TabPanel>
+  			</Tabs>
+		</div>;
 	}
 }
 

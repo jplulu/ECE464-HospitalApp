@@ -328,7 +328,7 @@ export class getdoc_patient extends Component {
 									nested
 								>
 									{(close) => (
-										<div className="model">
+										<div className="modal">
 											<form
 												onSubmit={() => {
 													this.handleCreateAppointment(doctor.username);

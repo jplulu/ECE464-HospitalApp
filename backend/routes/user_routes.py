@@ -69,7 +69,6 @@ def getUserByUsername():
 def getDoctors():
     spec_filter = request.args.get('spec')
     status_filter = request.args.get('status')
-    print(request.args)
     doctors = User.query.filter_by(user_type=UserType.DOCTOR)
     if status_filter:
         doctors = doctors.filter_by(user_status=status_filter)
