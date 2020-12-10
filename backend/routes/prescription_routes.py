@@ -57,11 +57,11 @@ def getPrescriptionsByUser(username):
         return jsonify({"error": "No prescriptions found"}), 404
 
     for prescription in prescriptions:
-        payload['prescriptions'].append(prescription.serialize())
+        payload['prescriptions'].append(prescription.serialize(user.user_type))
 
     return jsonify(payload), 200
 
-# TODO: User authorization checking
+
 @prescription_routes.route('/updateStatus', methods=['PUT'])
 def updatePrescriptionStatus():
     id = request.args.get('id')
@@ -79,4 +79,4 @@ def updatePrescriptionStatus():
     prescription.status = PrescriptionStatus[new_status]
     db.session.commit()
 
-    return jsonify(prescription.serialize()), 200
+    return jsonify(prescription.serialize(None)), 200

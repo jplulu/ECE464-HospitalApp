@@ -18,9 +18,9 @@ def addAppointment():
         return jsonify({"error": "Doctor not found"}), 400
     date = datetime.strptime(data['date'], '%Y-%m-%d').date()
     start = datetime.strptime(data['start'], '%H:%M').time()
-    end = datetime.strptime(data['end'], '%H:%M').time()
+    # end = datetime.strptime(data['end'], '%H:%M').time()
 
-    new_appointment = Appointment(data['description'], date, start, end)
+    new_appointment = Appointment(data['description'], date, start)
     new_appointment.patient = patient
     new_appointment.doctor = doctor
 
@@ -30,7 +30,7 @@ def addAppointment():
     except IntegrityError:
         return jsonify({"error": "Failed to add appointment"}), 400
 
-    return jsonify(new_appointment.serialize()), 200
+    return jsonify(new_appointment.serialize(None)), 200
 
 
 @appointment_routes.route('/<username>', methods=['GET'])
@@ -52,13 +52,16 @@ def getAppointmentsByUser(username):
         else:
             appointments = user.d_appointments
     else:
-        appointments = Appointment.query.all()
+        if status_filter:
+            appointments = Appointment.query.filter_by(status=status_filter).all()
+        else:
+            appointments = Appointment.query.all()
 
     if not appointments:
         return jsonify({"error": "No appointments found"}), 404
 
     for appointment in appointments:
-        payload['appointments'].append(appointment.serialize())
+        payload['appointments'].append(appointment.serialize(user.user_type))
 
     return jsonify(payload), 200
 
@@ -78,11 +81,11 @@ def updateAppointment():
         return jsonify({"error": "Appointment not found"}), 404
 
     if new_status:
-        if new_status not in ['CANCELED', 'ACTIVE', 'COMPLETED']:
+        if new_status not in ['CANCELED', 'ACTIVE', 'COMPLETE']:
             return jsonify({"error": "Invalid status"}), 400
         appointment.status = AppointmentStatus[new_status]
     if new_note:
         appointment.doctor_notes = new_note
     db.session.commit()
 
-    return jsonify(appointment.serialize()), 200
+    return jsonify(appointment.serialize(None)), 200

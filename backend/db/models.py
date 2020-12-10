@@ -18,7 +18,7 @@ class UserStatus(enum.Enum):
 
 
 class AppointmentStatus(enum.Enum):
-    CANCELLED = 0
+    CANCELED = 0
     PENDING = 1
     ACTIVE = 2
     COMPLETE = 3
@@ -117,17 +117,15 @@ class Appointment(db.Model):
     doctor_notes = db.Column(db.String(120))
     date = db.Column(db.Date, nullable=False)
     start = db.Column(db.Time, nullable=False)
-    end = db.Column(db.Time, nullable=False)
     status = db.Column(db.Enum(AppointmentStatus), nullable=False)
 
     patient = db.relationship('User', foreign_keys=[patient_id], backref='p_appointments')
     doctor = db.relationship('User', foreign_keys=[doctor_id], backref='d_appointments')
 
-    def __init__(self, description, date, start, end, status=AppointmentStatus.PENDING):
+    def __init__(self, description, date, start, status=AppointmentStatus.PENDING):
         self.description = description
         self.date = date
         self.start = start
-        self.end = end
         self.status = status
 
     def serialize(self, user_type):
@@ -137,7 +135,6 @@ class Appointment(db.Model):
                 "doctor_notes": self.doctor_notes,
                 "date": self.date.strftime("%Y-%m-%d"),
                 "start": self.start.strftime("%H:%M"),
-                "end": self.end.strftime("%H:%M"),
                 "status": self.status.name
             }
         if user_type == UserType.DOCTOR:
