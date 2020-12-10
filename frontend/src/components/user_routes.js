@@ -16,12 +16,15 @@ export class addspec_admin extends Component {
 
     handleSubmit = (e) => {
         e.preventDefault();
-        axios.post('/specialization',null,{
+        axios.post('http://localhost:5000/specialization',null,{
             params:{
                 spec: this.state.new_spec
             }
         })
-        console.log(this.state.new_spec)
+        .catch((error) => {
+            if (error.response) {console.log(error);}
+        })
+        window.location.reload();
     };
 
     handleChange = (e) => {
@@ -31,7 +34,7 @@ export class addspec_admin extends Component {
 	};
 
     componentDidMount() {
-        axios.get('/specialization', null, {
+        axios.get('http://localhost:5000/specialization', null, {
             params: {}
         })
             .then(response=> {
@@ -85,7 +88,7 @@ export class getdoc_admin extends Component{
     }
 
     componentDidMount() {
-        axios.get('/user/getDoctors', null, {
+        axios.get('http://localhost:5000/user/getDoctors', null, {
             params: {
                 spec: this.state.spec,
                 status: this.state.status,
@@ -114,18 +117,22 @@ export class getdoc_admin extends Component{
                           <td>
                               { (doctor.user_status === "PENDING") ?
                                   <div>
-                                      <button onClick={() => {axios.put('/user', null, {
+                                      <button onClick={() => {axios.put('http://localhost:5000/user', null, {
                                           params: {
                                               username: doctor.username,
                                               status: "APPROVED"
                                           }
-                                      })}}>Approve user</button>
-                                      <button onClick={() => {axios.put('/user', null, {
+                                      })
+                                          window.location.reload();
+                                      }}>Approve user</button>
+                                      <button onClick={() => {axios.put('http://localhost:5000/user', null, {
                                           params: {
                                               username: doctor.username,
                                               status: "REJECTED"
                                           }
-                                      })}}>Reject user</button>
+                                      })
+                                          window.location.reload();
+                                      }}>Reject user</button>
                                   </div>
                                   :
                                   null
@@ -160,12 +167,11 @@ export class getdoc_patient extends Component{
         const user = JSON.parse(localStorage.getItem("user"));
         this.setState({curr_user: user})
         axios.all([
-            axios.get('/user/getDoctors', null, {
+            axios.get('http://localhost:5000/user/getDoctors', {
             params: {
-                spec: this.state.spec,
                 status: this.state.status,
             }}),
-            axios.get('/specialization', null, {
+            axios.get('http://localhost:5000/specialization', null, {
             params: {}
             })
         ])
@@ -178,10 +184,11 @@ export class getdoc_patient extends Component{
 
     handleSubmit = (e) => {
         e.preventDefault();
-        axios.get('/user/getDoctors', {
+        axios.get('http://localhost:5000/user/getDoctors', {
             params: {
                 spec: this.state.spec
-            }})
+            }
+        })
             .then(data => {
                 this.setState({doctors: data.data.doctors})
                 console.log(this.state.doctors)
@@ -209,7 +216,7 @@ export class getdoc_patient extends Component{
         console.log(doc_usrname)
 
 
-        axios.post('/appointment', {
+        axios.post('http://localhost:5000/appointment', {
             patient:this.state.curr_user.username,
             doctor:doc_usrname,
             description:this.state.description,
