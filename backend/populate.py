@@ -42,7 +42,6 @@ def create_users(num_entries):
 
     for i in range(num_entries):
         new_usr = models.User(ret[0][i], ret[1][i], ret[2][i], ret[3][i], ret[4][i], ret[5][i], ret[6][i], ret[7][i])
-        print(ret[0][i])
         user_arr.append(new_usr)
     return user_arr
 
@@ -130,8 +129,11 @@ def populate():
         # For doctors, select a specialization from pre established table
         if usr.user_type == models.UserType.DOCTOR:
             usr.specialization = (choice(spec))
-        s.add(usr)
-    s.commit()
+        try:
+            s.add(usr)
+            s.commit()
+        except exc.IntegrityError:
+            s.rollback()
     # Populate Appointments
     doc = s.query(models.User).filter(models.User.user_type == models.UserType.DOCTOR).all()
     pat = s.query(models.User).filter(models.User.user_type == models.UserType.PATIENT).all()

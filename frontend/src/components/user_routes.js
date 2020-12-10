@@ -3,6 +3,7 @@ import axios from "axios";
 import { Table } from "semantic-ui-react";
 import Popup from "reactjs-popup";
 import "./popup.css";
+import loggedIn from "./loggedIn";
 
 export class addspec_admin extends Component {
 	constructor() {
@@ -36,15 +37,19 @@ export class addspec_admin extends Component {
 	};
 
 	componentDidMount() {
-		axios
-			.get("http://localhost:5000/specialization", null, {
-				params: {},
-			})
-			.then((response) => {
-				console.log(response.data);
-				this.setState({ exist_spec: response.data.specializations });
-			})
-			.catch((err) => console.log(err));
+		if (loggedIn()) {
+			axios
+				.get("http://localhost:5000/specialization", null, {
+					params: {},
+				})
+				.then((response) => {
+					console.log(response.data);
+					this.setState({ exist_spec: response.data.specializations });
+				})
+				.catch((err) => console.log(err));
+		} else {
+			this.props.history.push("/");
+		}
 	}
 
 	render() {
@@ -91,18 +96,22 @@ export class getdoc_admin extends Component {
 	}
 
 	componentDidMount() {
-		axios
-			.get("http://localhost:5000/user/getDoctors", null, {
-				params: {
-					spec: this.state.spec,
-					status: this.state.status,
-				},
-			})
-			.then((response) => {
-				console.log(response.data);
-				this.setState({ doctors: response.data.doctors });
-			})
-			.catch((err) => console.log(err));
+		if (loggedIn()) {
+			axios
+				.get("http://localhost:5000/user/getDoctors", null, {
+					params: {
+						spec: this.state.spec,
+						status: this.state.status,
+					},
+				})
+				.then((response) => {
+					console.log(response.data);
+					this.setState({ doctors: response.data.doctors });
+				})
+				.catch((err) => console.log(err));
+		} else {
+			this.props.history.push("/");
+		}
 	}
 
 	render() {
@@ -176,26 +185,30 @@ export class getdoc_patient extends Component {
 	}
 
 	componentDidMount() {
-		const user = JSON.parse(localStorage.getItem("user"));
-		this.setState({ curr_user: user });
-		axios
-			.all([
-				axios.get("http://localhost:5000/user/getDoctors", {
-					params: {
-						status: this.state.status,
-					},
-				}),
-				axios.get("http://localhost:5000/specialization", null, {
-					params: {},
-				}),
-			])
-			.then(
-				axios.spread((data1, data2) => {
-					console.log("data1", data1.data, "data2", data2.data);
-					this.setState({ doctors: data1.data.doctors });
-					this.setState({ exist_spec: data2.data.specializations });
-				})
-			);
+		if (loggedIn()) {
+			const user = JSON.parse(localStorage.getItem("user"));
+			this.setState({ curr_user: user });
+			axios
+				.all([
+					axios.get("http://localhost:5000/user/getDoctors", {
+						params: {
+							status: this.state.status,
+						},
+					}),
+					axios.get("http://localhost:5000/specialization", null, {
+						params: {},
+					}),
+				])
+				.then(
+					axios.spread((data1, data2) => {
+						console.log("data1", data1.data, "data2", data2.data);
+						this.setState({ doctors: data1.data.doctors });
+						this.setState({ exist_spec: data2.data.specializations });
+					})
+				);
+		} else {
+			this.props.history.push("/");
+		}
 	}
 
 	handleSubmit = (e) => {
