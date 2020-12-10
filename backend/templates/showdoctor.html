@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <select name="specialization" method="GET" action="/">
+            <option value="{{specializations[0]}}" selected>{{specializations[0]}}</option>
+            {% for specialization in specializations[1:] %}
+                <option value="{{specialization}}">{{specialization}}</option>
+            {% endfor %}
+        </select>
+    </head>
+     <table>
+         <tbody>
+             {% for doctor in doc_list %}
+                <tr>
+                    <td>{{ doctor.email }}</td>
+                    <td>{{ doctor.first_name }}</td>
+                    <td>{{ doctor.last_name }}</td>
+                    <td>{{ doctor.phone_number }}</td>
+                    <td>{{ doctor.name }}</td>
+                    <td>{{ doctor.spec_name }}</td>
+                </tr>
+            {% endfor %}
+         </tbody>
+     </table>
+ </body>
+ </html>
