@@ -3,11 +3,7 @@ import Nav from "./Nav";
 
 class Patient extends Component {
 	render() {
-		return (
-			<div>
-				<Nav></Nav>
-			</div>
-		);
+		return <div></div>;
 	}
 }
 

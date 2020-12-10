@@ -20,7 +20,6 @@ class Home extends Component {
 	render() {
 		return (
 			<div>
-				<Nav></Nav>
 				<h1>Welcome</h1>
 				<Login></Login>
 			</div>

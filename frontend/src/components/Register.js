@@ -229,7 +229,6 @@ class Register extends Component {
 
 		return (
 			<div>
-				<Nav></Nav>
 				<h2>Register</h2>
 				<form onSubmit={this.handleSubmit}>
 					<label>Role </label>
@@ -305,6 +304,10 @@ class Register extends Component {
 					{signupForm}
 					<div style={{ color: "red" }}>{errors.response}</div>
 					<button type="submit">Register</button>
+					<p>
+						Already have an account? Login{" "}
+						<a href="http://localhost:3000/">here</a>
+					</p>
 				</form>
 			</div>
 		);
