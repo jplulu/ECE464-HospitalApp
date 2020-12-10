@@ -71,8 +71,7 @@ def create_appointment(patients, doctors):
             description = "Placeholder"
             date = rand_date(date_range)
             start = time(9,10)
-            end = time(10,10)
-            app = models.Appointment(description,date,start,end)
+            app = models.Appointment(description,date,start)
             app.patient = patient
             app.doctor = choice(doctors)
             app_arr.append(app)

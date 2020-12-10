@@ -18,9 +18,9 @@ def addAppointment():
         return jsonify({"error": "Doctor not found"}), 400
     date = datetime.strptime(data['date'], '%Y-%m-%d').date()
     start = datetime.strptime(data['start'], '%H:%M').time()
-    end = datetime.strptime(data['end'], '%H:%M').time()
+    # end = datetime.strptime(data['end'], '%H:%M').time()
 
-    new_appointment = Appointment(data['description'], date, start, end)
+    new_appointment = Appointment(data['description'], date, start)
     new_appointment.patient = patient
     new_appointment.doctor = doctor
 
@@ -30,7 +30,7 @@ def addAppointment():
     except IntegrityError:
         return jsonify({"error": "Failed to add appointment"}), 400
 
-    return jsonify(new_appointment.serialize()), 200
+    return jsonify(new_appointment.serialize(None)), 200
 
 
 @appointment_routes.route('/<username>', methods=['GET'])
