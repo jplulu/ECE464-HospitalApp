@@ -81,9 +81,15 @@ class Doctor extends Component {
 			})
 			.then(() => {
 				console.log("success");
-				window.location.reload();
+				axios
+					.get(`http://localhost:5000/appointment/${this.state.info.username}`)
+					.catch((error) => {
+						console.log(error.response);
+					})
+					.then((response) => {this.setState({appointments : response.data.appointments})})
 			})
 			.catch((error) => console.log(error));
+		this.forceUpdate();
 	}
 
 	handleAppointmentFilter = (e) => {
@@ -165,7 +171,6 @@ class Doctor extends Component {
 
 	render() {
 		const user_status = this.state.info.user_status;
-		console.log(user_status);
 		const {
 			prescriptions,
 			note,
