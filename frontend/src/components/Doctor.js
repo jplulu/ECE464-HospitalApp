@@ -23,6 +23,8 @@ class Doctor extends Component {
 
 			drug: "",
 			dosage: "",
+
+			loading: true,
 		};
 	}
 
@@ -56,6 +58,7 @@ class Doctor extends Component {
 				info: info,
 				appointments: appointments,
 				prescriptions: prescriptions,
+				loading: false,
 			});
 		} else {
 			this.props.history.push("/");
@@ -99,9 +102,7 @@ class Doctor extends Component {
 			})
 			.then((response) => {
 				this.setState({ appointments: response.data.appointments });
-				console.log(this.state.appointments);
 			})
-
 			.catch((error) => {
 				if (error.response) {
 					console.log(error);
@@ -121,8 +122,6 @@ class Doctor extends Component {
 			})
 			.then((response) => {
 				this.setState({ prescriptions: response.data.prescriptions });
-				console.log(this.state.prescriptions);
-				this.forceUpdate();
 			})
 			.catch((error) => {
 				if (error.response) {
@@ -130,6 +129,7 @@ class Doctor extends Component {
 				}
 				this.setState({ prescriptions: [] });
 			});
+		this.forceUpdate();
 	};
 
 	handleAddPrescription(patient_username) {
@@ -153,19 +153,7 @@ class Doctor extends Component {
 		axios
 			.post("http://localhost:5000/prescription", new_prescription)
 			.then(() => {
-				console.log("success");
-				axios
-					.get(`http://localhost:5000/prescription/${this.state.info.username}`)
-					.catch((error) => {
-						console.log(error.response);
-					})
-					.then((response) => {
-						this.setState({
-							prescriptions : response.data.prescriptions,
-							dosage : "",
-							drug : "",
-						})
-					})
+				window.location.reload();
 			})
 			.catch((error) => console.log(error));
 	}
@@ -183,24 +171,6 @@ class Doctor extends Component {
 
 	render() {
 		const user_status = this.state.info.user_status;
-		console.log(this.state.info.user_status)
-		if (user_status !== "APPROVED") {
-			console.log(user_status)
-			return user_status === "PENDING" ? (
-				<div style={{ textAlign: "center", margin: "auto" }}>
-					<br></br>
-					<h1>Your account has not been approved.</h1>
-					<h2>The admin team is working on it.</h2>
-				</div>
-			) : (
-				<div style={{ textAlign: "center", margin: "auto" }}>
-					<br></br>
-					<h1>Your account has been rejected.</h1>
-					<h2>Please contact the admin team for more info.</h2>
-				</div>
-			);
-		}
-
 		const {
 			prescriptions,
 			note,
@@ -208,7 +178,9 @@ class Doctor extends Component {
 			prescription_status,
 			dosage,
 			drug,
+			loading,
 		} = this.state;
+
 		let appointmentsMarkup = (
 			<div style={{ textAlign: "center", margin: "auto" }}>
 				<h2>My Appointments</h2>
@@ -284,7 +256,6 @@ class Doctor extends Component {
 															},
 														})
 														.then(() => {
-															console.log("success");
 															window.location.reload();
 														})
 														.catch((error) => console.log(error));
@@ -302,7 +273,6 @@ class Doctor extends Component {
 															},
 														})
 														.then(() => {
-															console.log("success");
 															window.location.reload();
 														})
 														.catch((error) => console.log(error));
@@ -324,7 +294,6 @@ class Doctor extends Component {
 															},
 														})
 														.then(() => {
-															console.log("success");
 															window.location.reload();
 														})
 														.catch((error) => console.log(error));
@@ -462,19 +431,39 @@ class Doctor extends Component {
 
 		return (
 			<div>
-				<Tabs>
-					<TabList>
-						<Tab>Appointments</Tab>
-						<Tab>Prescriptions</Tab>
-					</TabList>
+				{loading ? (
+					<div>
+						<h1 style={{ textAlign: "center" }}>Loading...</h1>
+					</div>
+				) : user_status !== "APPROVED" ? (
+					user_status === "PENDING" ? (
+						<div style={{ textAlign: "center", margin: "auto" }}>
+							<br></br>
+							<h1>Your account has not been approved.</h1>
+							<h2>The admin team is working on it.</h2>
+						</div>
+					) : (
+						<div style={{ textAlign: "center", margin: "auto" }}>
+							<br></br>
+							<h1>Your account has been rejected.</h1>
+							<h2>Please contact the admin team for more info.</h2>
+						</div>
+					)
+				) : (
+					<Tabs>
+						<TabList>
+							<Tab>Appointments</Tab>
+							<Tab>Prescriptions</Tab>
+						</TabList>
 
-					<TabPanel>
-						<div>{appointmentsMarkup}</div>
-					</TabPanel>
-					<TabPanel>
-						<div>{prescriptionMarkup}</div>
-					</TabPanel>
-				</Tabs>
+						<TabPanel>
+							<div>{appointmentsMarkup}</div>
+						</TabPanel>
+						<TabPanel>
+							<div>{prescriptionMarkup}</div>
+						</TabPanel>
+					</Tabs>
+				)}
 			</div>
 		);
 	}
