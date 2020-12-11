@@ -26,7 +26,8 @@ class Patient extends Component{
 	};
 
 	async componentDidMount() {
-		if (loggedIn()) {
+		var user = JSON.parse(localStorage.getItem("user"))
+		if (loggedIn() && user.user_type == "PATIENT") {
 			const username = JSON.parse(localStorage.getItem("user")).username;
 			let appointments = [];
 			let prescriptions = [];

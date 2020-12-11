@@ -7,7 +7,8 @@ import 'react-tabs/style/react-tabs.css';
 
 class Admin extends Component {
 	componentDidMount() {
-		if (!loggedIn()) {
+		var user = localStorage.getItem("user")
+		if (!loggedIn() || user.user_type != "ADMIN") {
 			this.props.history.push("/");
 		}
 	}
