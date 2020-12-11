@@ -1,5 +1,5 @@
 import './App.css';
-import {getdoc_admin, addspec_admin, getdoc_patient} from './components/user_routes'
+import {getdoc_patient} from './components/user_routes'
 import Login from './components/Login.js'
 import {BrowserRouter as Router, Route, Switch} from 'react-router-dom';
 import "./App.css";
@@ -21,9 +21,9 @@ function App() {
 					<Route path="/patient" exact component={Patient}/>
 					<Route path="/doctor" exact component={Doctor}/>
 					<Route path="/login" exact component={Login}/>
-          			<Route path="/doctor/getDoctors" exact component={getdoc_admin}/>
-					<Route path="/patient/getDoctors" exact component={getdoc_patient}/>
-					<Route path="/admin/addSpec" exact component={addspec_admin}/>
+          			{/*<Route path="/doctor/getDoctors" exact component={getdoc_admin}/>*/}
+					{/*<Route path="/patient/getDoctors" exact component={getdoc_patient}/>*/}
+					{/*<Route path="/admin/addSpec" exact component={addspec_admin}/>*/}
 				</Switch>
 		</Router>
 	);

@@ -5,6 +5,7 @@ import loggedIn from "./loggedIn";
 import {Table} from "semantic-ui-react";
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import 'react-tabs/style/react-tabs.css';
+import {Getdoc_patient} from "./user_routes"
 
 class Patient extends Component{
 	constructor(props) {
@@ -163,8 +164,8 @@ class Patient extends Component{
 					{this.state.appointments.map((appointment) => (
 						<tr key={appointment.id}>
 							<td>
-								{appointment.doctor.first_name +
-									appointment.doctor.first_name}
+								{appointment.doctor.first_name + " " +
+									appointment.doctor.last_name}
 							</td>
 							<td>{this.getAge(appointment.doctor.dob)}</td>
 							<td>{appointment.doctor.phone_number}</td>
@@ -243,10 +244,12 @@ class Patient extends Component{
 		)
 
 		return <div>
+			<h1>Patient</h1>
 			<Tabs>
 				<TabList>
 				  <Tab>Appointment</Tab>
 				  <Tab>Prescriptions</Tab>
+				  <Tab>Doctors</Tab>
 				</TabList>
 
 				<TabPanel>
@@ -254,6 +257,9 @@ class Patient extends Component{
 				</TabPanel>
 				<TabPanel>
 				  <div>{prescriptionMarkup}</div>
+				</TabPanel>
+				<TabPanel>
+					<Getdoc_patient></Getdoc_patient>
 				</TabPanel>
   			</Tabs>
 		</div>;
