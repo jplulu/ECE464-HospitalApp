@@ -19,7 +19,7 @@ class Home extends Component {
 
 	render() {
 		return (
-			<div>
+			<div style={{ textAlign: "center" }}>
 				<h1>Welcome</h1>
 				<Login></Login>
 			</div>

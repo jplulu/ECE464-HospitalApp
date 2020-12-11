@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import axios from "axios";
 import loggedIn from "./loggedIn";
-import Nav from "./Nav";
 
 class Register extends Component {
 	constructor(props) {
@@ -115,8 +114,6 @@ class Register extends Component {
 		if (isValid) {
 			let newUser = { ...this.state };
 			delete newUser.spec_list;
-			console.log(newUser);
-			console.log(this.state);
 			axios
 				.post("http://localhost:5000/user/register", newUser)
 				.then((response) => {
@@ -160,6 +157,15 @@ class Register extends Component {
 		} = this.state;
 
 		let signupForm = null;
+		let d = new Date(),
+			month = "" + (d.getMonth() + 1),
+			day = "" + d.getDate(),
+			year = d.getFullYear();
+
+		if (month.length < 2) month = "0" + month;
+		if (day.length < 2) day = "0" + day;
+
+		const today = [year, month, day].join("-");
 
 		if (user_type === "PATIENT") {
 			signupForm = (
@@ -181,6 +187,7 @@ class Register extends Component {
 							name="dob"
 							value={dob}
 							onChange={this.handleChange}
+							max={today}
 						/>
 					</div>
 					<div style={{ color: "red" }}>{errors.dob}</div>
@@ -206,6 +213,7 @@ class Register extends Component {
 							name="dob"
 							value={dob}
 							onChange={this.handleChange}
+							max={today}
 						/>
 					</div>
 					<div style={{ color: "red" }}>{errors.dob}</div>
@@ -228,7 +236,7 @@ class Register extends Component {
 		}
 
 		return (
-			<div>
+			<div style={{ textAlign: "center" }}>
 				<h2>Register</h2>
 				<form onSubmit={this.handleSubmit}>
 					<label>Role </label>
