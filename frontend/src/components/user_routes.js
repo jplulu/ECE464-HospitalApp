@@ -55,19 +55,11 @@ export class Addspec_admin extends Component {
 	render() {
 		const { new_spec } = this.state;
 		return (
-			<div>
+			<div style={{ textAlign: "center", margin: "auto" }}>
 				<h1>Specializations List</h1>
-				<Table>
-					<tbody>
-						{this.state.exist_spec.map((spec) => (
-							<tr key={spec.id}>
-								<td>{spec.spec}</td>
-							</tr>
-						))}
-					</tbody>
-				</Table>
 				<form onSubmit={this.handleSubmit}>
 					<div>
+						<label>Add Specialization</label>
 						<input
 							type="text"
 							name="new_spec"
@@ -80,6 +72,16 @@ export class Addspec_admin extends Component {
 						<button type="submit">Add</button>
 					</div>
 				</form>
+				<br></br>
+				<Table style={{ textAlign: "center", margin: "auto" }}>
+					<tbody>
+						{this.state.exist_spec.map((spec) => (
+							<tr key={spec.id}>
+								<td>{spec.spec}</td>
+							</tr>
+						))}
+					</tbody>
+				</Table>
 			</div>
 		);
 	}
@@ -137,26 +139,34 @@ export class Getdoc_admin extends Component {
 										<div>
 											<button
 												onClick={() => {
-													axios.put("http://localhost:5000/user", null, {
-														params: {
-															username: doctor.username,
-															status: "APPROVED",
-														},
-													});
-													window.location.reload();
+													axios
+														.put("http://localhost:5000/user", null, {
+															params: {
+																username: doctor.username,
+																status: "APPROVED",
+															},
+														})
+														.then(() => {
+															window.location.reload();
+														})
+														.catch((error) => console.log(error));
 												}}
 											>
 												Approve user
 											</button>
 											<button
 												onClick={() => {
-													axios.put("http://localhost:5000/user", null, {
-														params: {
-															username: doctor.username,
-															status: "REJECTED",
-														},
-													});
-													window.location.reload();
+													axios
+														.put("http://localhost:5000/user", null, {
+															params: {
+																username: doctor.username,
+																status: "REJECTED",
+															},
+														})
+														.then(() => {
+															window.location.reload();
+														})
+														.catch((error) => console.log(error));
 												}}
 											>
 												Reject user

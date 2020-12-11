@@ -125,7 +125,7 @@ class Register extends Component {
 						user_status: data.user_status,
 					};
 					localStorage.setItem("user", JSON.stringify(user));
-					this.props.history.push("/");
+					window.location.href = "http://localhost:3000/";
 				})
 				.catch((error) => {
 					if (error.response) {
