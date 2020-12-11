@@ -28,14 +28,18 @@ def create_users(num_entries):
         last_name = names.get_last_name()
         dob = random_date(dob_range[0], dob_range[1])
         phone_number = ''.join(str(randint(0, 9)) for _ in range(10))
+        use_type = choice(usertype_weighting)
 
         dob_arr.append(dob)
         email_arr.append(first_name + last_name + str(i) + "@example.com")
         uname_arr.append(first_name + last_name + str(i))
         fname_arr.append(first_name)
         lname_arr.append(last_name)
-        usertype_arr.append(choice(usertype_weighting))
-        userstat_arr.append(choice([models.UserStatus.APPROVED, models.UserStatus.PENDING]))
+        usertype_arr.append(use_type)
+        if use_type == models.UserType.PATIENT or use_type == models.UserType.ADMIN:
+            userstat_arr.append(models.UserStatus.APPROVED)
+        else:
+            userstat_arr.append(choice([models.UserStatus.APPROVED, models.UserStatus.PENDING]))
         pnum_arr.append(phone_number)
 
     ret = [email_arr, uname_arr, fname_arr, lname_arr, dob_arr, pnum_arr, usertype_arr, userstat_arr]
@@ -121,7 +125,7 @@ def populate():
     except exc.IntegrityError:
         s.rollback()
     # Populate Users
-    usr_arr = create_users(1000)
+    usr_arr = create_users(300)
     spec = s.query(models.Specialization).all()
     for usr in usr_arr:
         # usr.set_password(secrets.token_urlsafe(16))

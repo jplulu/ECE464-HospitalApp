@@ -7,8 +7,9 @@ import 'react-tabs/style/react-tabs.css';
 
 class Admin extends Component {
 	componentDidMount() {
-		var user = localStorage.getItem("user")
-		if (!loggedIn() || user.user_type != "ADMIN") {
+		var usr_type = JSON.parse(localStorage.getItem("user")).user_type
+		if (loggedIn() && (usr_type === "ADMIN")) {}
+		else{
 			this.props.history.push("/");
 		}
 	}
@@ -19,7 +20,7 @@ class Admin extends Component {
 			<h1 align="center">Admin</h1>
 			<Tabs>
 				<TabList>
-				  <Tab>Add Specilizations</Tab>
+				  <Tab>Add Specializations</Tab>
 				  <Tab>Approve/Reject Doctors</Tab>
 				</TabList>
 
