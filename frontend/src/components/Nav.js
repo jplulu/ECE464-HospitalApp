@@ -12,14 +12,14 @@ const Nav = (props) => {
 			return (
 				<div>
 					<button onClick={handleLogout}>Logout</button>
-					<h1>Admin View</h1>
+					<h1 style={{ textAlign: "center" }}>Admin View</h1>
 				</div>
 			);
 		} else if (user.user_type === "PATIENT") {
 			return (
 				<div>
 					<button onClick={handleLogout}>Logout</button>
-					<h1>Patient View</h1>
+					<h1 style={{ textAlign: "center" }}>Patient View</h1>
 				</div>
 			);
 		} else {

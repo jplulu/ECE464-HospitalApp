@@ -52,7 +52,7 @@ def create_users(num_entries):
 
 def create_specialization():
     spec_arr = []
-    specializations = open("specializations.txt").read().splitlines()
+    specializations = open("./backend/specializations.txt").read().splitlines()
     for spec in specializations:
         spec_arr.append(models.Specialization(spec))
 
@@ -113,7 +113,7 @@ def create_prescription(patients, doctors):
 
 
 def populate():
-    e = create_engine('mysql+pymysql:///hospital')
+    e = create_engine('mysql://root:password@localhost/hospital')
     conn = e.connect()
     session = sessionmaker(bind=e)
     s = session()
