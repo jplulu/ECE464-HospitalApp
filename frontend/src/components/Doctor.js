@@ -78,9 +78,15 @@ class Doctor extends Component {
 			})
 			.then(() => {
 				console.log("success");
-				window.location.reload();
+				axios
+					.get(`http://localhost:5000/appointment/${this.state.info.username}`)
+					.catch((error) => {
+						console.log(error.response);
+					})
+					.then((response) => {this.setState({appointments : response.data.appointments})})
 			})
 			.catch((error) => console.log(error));
+		this.forceUpdate();
 	}
 
 	handleAppointmentFilter = (e) => {
@@ -148,7 +154,18 @@ class Doctor extends Component {
 			.post("http://localhost:5000/prescription", new_prescription)
 			.then(() => {
 				console.log("success");
-				window.location.reload();
+				axios
+					.get(`http://localhost:5000/prescription/${this.state.info.username}`)
+					.catch((error) => {
+						console.log(error.response);
+					})
+					.then((response) => {
+						this.setState({
+							prescriptions : response.data.prescriptions,
+							dosage : "",
+							drug : "",
+						})
+					})
 			})
 			.catch((error) => console.log(error));
 	}
@@ -166,7 +183,9 @@ class Doctor extends Component {
 
 	render() {
 		const user_status = this.state.info.user_status;
+		console.log(this.state.info.user_status)
 		if (user_status !== "APPROVED") {
+			console.log(user_status)
 			return user_status === "PENDING" ? (
 				<div style={{ textAlign: "center", margin: "auto" }}>
 					<br></br>

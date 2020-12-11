@@ -92,8 +92,15 @@ export class Getdoc_admin extends Component {
 			doctors: [],
 			spec: "This",
 			status: "APPROVED",
+			admin_doc_status: ""
 		};
 	}
+
+	handleChange = (e) => {
+		this.setState({
+			[e.target.name]: e.target.value,
+		});
+	};
 
 	componentDidMount() {
 		if (loggedIn()) {
@@ -114,10 +121,41 @@ export class Getdoc_admin extends Component {
 		}
 	}
 
+	handledocFilter = (e) => {
+		console.log(this.state.admin_doc_status)
+		e.preventDefault();
+		axios
+			.get("http://localhost:5000/user/getDoctors", {
+				params: {
+					status: this.state.admin_doc_status,
+				},
+			})
+			.then((data) => {
+				this.setState({ doctors: data.data.doctors });
+				console.log(this.state.doctors);
+			})
+			.catch((error) => {
+				if (error.response) {
+					console.log(error);
+				}
+				this.setState({doctors: []});
+			});
+		this.forceUpdate();
+	}
+
 	render() {
 		return (
 			<div>
 				<h1 align="center">Doctor List</h1>
+				<form onSubmit={this.handledocFilter}>
+							<select name="admin_doc_status" value={this.state.admin_doc_status} onChange={this.handleChange}>
+								<option value="">All Status</option>
+								<option value="PENDING">PENDING</option>
+								<option value="APPROVED">APPROVED</option>
+								<option value="REJECTED">REJECTED</option>
+							</select>
+							<button type="submit">Filter</button>
+						</form>
 				<Table align="center">
 					<tr>
 						<tr>
