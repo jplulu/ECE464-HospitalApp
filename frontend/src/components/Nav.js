@@ -8,11 +8,28 @@ const Nav = (props) => {
 
 	const user = JSON.parse(localStorage.getItem("user"));
 	if (user != null) {
-		return (
-			<div>
-				<button onClick={handleLogout}>Logout</button>
-			</div>
-		);
+		if (user.user_type === "ADMIN") {
+			return (
+				<div>
+					<button onClick={handleLogout}>Logout</button>
+					<h1>Admin View</h1>
+				</div>
+			);
+		} else if (user.user_type === "PATIENT") {
+			return (
+				<div>
+					<button onClick={handleLogout}>Logout</button>
+					<h1>Patient View</h1>
+				</div>
+			);
+		} else {
+			return (
+				<div>
+					<button onClick={handleLogout}>Logout</button>
+					<h1 style={{ textAlign: "center" }}>Doctor View</h1>
+				</div>
+			);
+		}
 	} else {
 		return (
 			<div>

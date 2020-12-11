@@ -1,13 +1,15 @@
 .modal {
 	font-size: 12px;
-	background: blueviolet;
+	background: coral;
+	width: 100%; /* Full width */
+	text-align: center;
+	margin: auto;
 }
 .modal > .header {
 	width: 100%;
-	border-bottom: 1px solid gray;
 	font-size: 18px;
 	text-align: center;
-	padding: 5px;
+	padding: 10px;
 }
 .modal > .content {
 	width: 100%;

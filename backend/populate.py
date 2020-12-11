@@ -123,9 +123,9 @@ def populate():
     # Populate Users
     usr_arr = create_users(100)
     spec = s.query(models.Specialization).all()
-    print(spec)
     for usr in usr_arr:
-        usr.set_password(secrets.token_urlsafe(16))
+        # usr.set_password(secrets.token_urlsafe(16))
+        usr.set_password("1")
         # For doctors, select a specialization from pre established table
         if usr.user_type == models.UserType.DOCTOR:
             usr.specialization = (choice(spec))
