@@ -69,7 +69,6 @@ def getUserByUsername():
 def getDoctors():
     spec_filter = request.args.get('spec')
     status_filter = request.args.get('status')
-    print(request.args)
     doctors = User.query.filter_by(user_type=UserType.DOCTOR)
     if status_filter:
         doctors = doctors.filter_by(user_status=status_filter)
@@ -93,8 +92,6 @@ def getDoctors():
 def updateUser():
     username = request.args.get('username')
     new_status = request.args.get('status')
-    print(username)
-    print(new_status)
     if username is None:
         return jsonify({"error": "Missing request parameters"}), 400
 

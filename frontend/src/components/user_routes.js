@@ -3,8 +3,9 @@ import axios from "axios";
 import { Table } from "semantic-ui-react";
 import Popup from "reactjs-popup";
 import "./popup.css";
+import loggedIn from "./loggedIn";
 
-export class addspec_admin extends Component {
+export class Addspec_admin extends Component {
 	constructor() {
 		super();
 		this.state = {
@@ -36,15 +37,19 @@ export class addspec_admin extends Component {
 	};
 
 	componentDidMount() {
-		axios
-			.get("http://localhost:5000/specialization", null, {
-				params: {},
-			})
-			.then((response) => {
-				console.log(response.data);
-				this.setState({ exist_spec: response.data.specializations });
-			})
-			.catch((err) => console.log(err));
+		if (loggedIn()) {
+			axios
+				.get("http://localhost:5000/specialization", null, {
+					params: {},
+				})
+				.then((response) => {
+					console.log(response.data);
+					this.setState({ exist_spec: response.data.specializations });
+				})
+				.catch((err) => console.log(err));
+		} else {
+			this.props.history.push("/");
+		}
 	}
 
 	render() {
@@ -53,13 +58,13 @@ export class addspec_admin extends Component {
 			<div>
 				<h1>Specializations List</h1>
 				<Table>
-					<tr>
+					<tbody>
 						{this.state.exist_spec.map((spec) => (
-							<td key={spec.id}>
+							<tr key={spec.id}>
 								<td>{spec.spec}</td>
-							</td>
+							</tr>
 						))}
-					</tr>
+					</tbody>
 				</Table>
 				<form onSubmit={this.handleSubmit}>
 					<div>
@@ -80,7 +85,7 @@ export class addspec_admin extends Component {
 	}
 }
 
-export class getdoc_admin extends Component {
+export class Getdoc_admin extends Component {
 	constructor() {
 		super();
 		this.state = {
@@ -91,31 +96,40 @@ export class getdoc_admin extends Component {
 	}
 
 	componentDidMount() {
-		axios
-			.get("http://localhost:5000/user/getDoctors", null, {
-				params: {
-					spec: this.state.spec,
-					status: this.state.status,
-				},
-			})
-			.then((response) => {
-				console.log(response.data);
-				this.setState({ doctors: response.data.doctors });
-			})
-			.catch((err) => console.log(err));
+		if (loggedIn()) {
+			axios
+				.get("http://localhost:5000/user/getDoctors", null, {
+					params: {
+						spec: this.state.spec,
+						status: this.state.status,
+					},
+				})
+				.then((response) => {
+					console.log(response.data);
+					this.setState({ doctors: response.data.doctors });
+				})
+				.catch((err) => console.log(err));
+		} else {
+			this.props.history.push("/");
+		}
 	}
 
 	render() {
 		return (
 			<div>
-				<h1>Doctor List</h1>
-				<Table>
+				<h1 align="center">Doctor List</h1>
+				<Table align="center">
 					<tr>
+						<tr>
+							<td>Email</td>
+							<td>Name</td>
+							<td>Specialization</td>
+							<td>User status</td>
+						</tr>
 						{this.state.doctors.map((doctor) => (
 							<tr key={doctor.id}>
 								<td>{doctor.email}</td>
-								<td>{doctor.first_name}</td>
-								<td>{doctor.last_name}</td>
+								<td>{doctor.first_name + " " + doctor.last_name}</td>
 								<td>{doctor.specialization}</td>
 								<td>{doctor.user_status}</td>
 								<td>
@@ -159,7 +173,7 @@ export class getdoc_admin extends Component {
 	}
 }
 
-export class getdoc_patient extends Component {
+export class Getdoc_patient extends Component {
 	constructor() {
 		super();
 		this.state = {
@@ -176,26 +190,30 @@ export class getdoc_patient extends Component {
 	}
 
 	componentDidMount() {
-		const user = JSON.parse(localStorage.getItem("user"));
-		this.setState({ curr_user: user });
-		axios
-			.all([
-				axios.get("http://localhost:5000/user/getDoctors", {
-					params: {
-						status: this.state.status,
-					},
-				}),
-				axios.get("http://localhost:5000/specialization", null, {
-					params: {},
-				}),
-			])
-			.then(
-				axios.spread((data1, data2) => {
-					console.log("data1", data1.data, "data2", data2.data);
-					this.setState({ doctors: data1.data.doctors });
-					this.setState({ exist_spec: data2.data.specializations });
-				})
-			);
+		if (loggedIn()) {
+			const user = JSON.parse(localStorage.getItem("user"));
+			this.setState({ curr_user: user });
+			axios
+				.all([
+					axios.get("http://localhost:5000/user/getDoctors", {
+						params: {
+							status: this.state.status,
+						},
+					}),
+					axios.get("http://localhost:5000/specialization", null, {
+						params: {},
+					}),
+				])
+				.then(
+					axios.spread((data1, data2) => {
+						console.log("data1", data1.data, "data2", data2.data);
+						this.setState({ doctors: data1.data.doctors });
+						this.setState({ exist_spec: data2.data.specializations });
+					})
+				);
+		} else {
+			this.props.history.push("/");
+		}
 	}
 
 	handleSubmit = (e) => {
@@ -238,7 +256,8 @@ export class getdoc_patient extends Component {
 			})
 			.catch((error) => {
 				console.log(error.response.data.error);
-			});
+			})
+			.then(window.location.reload());
 	}
 
 	getAge = (dob) => {
@@ -267,7 +286,7 @@ export class getdoc_patient extends Component {
 			<option value={s.spec}>{s.spec}</option>
 		));
 		return (
-			<div>
+			<div align="center">
 				<h1>Make appointment</h1>
 				<h2>Doctor List</h2>
 				<form onSubmit={this.handleSubmit}>
@@ -315,14 +334,17 @@ export class getdoc_patient extends Component {
 									nested
 								>
 									{(close) => (
-										<div className="model">
+										<div className="modal">
 											<form
 												onSubmit={() => {
 													this.handleCreateAppointment(doctor.username);
 													close();
 												}}
 											>
-												<input
+												<h3>New Appointment</h3>
+												<textarea
+													cols="30"
+													rows="10"
 													type="text"
 													name="description"
 													placeholder="description"
