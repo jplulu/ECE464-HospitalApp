@@ -18,15 +18,15 @@ class Admin extends Component {
 			<div style={{ textAlign: "center", margin: "auto" }}>
 				<Tabs>
 					<TabList>
-						<Tab>Add Specializations</Tab>
 						<Tab>Approve/Reject Doctors</Tab>
+						<Tab>Add Specializations</Tab>
 					</TabList>
 
 					<TabPanel>
-						<Addspec_admin/>
+						<Getdoc_admin/>
 					</TabPanel>
 					<TabPanel>
-						<Getdoc_admin/>
+						<Addspec_admin/>
 					</TabPanel>
 				</Tabs>
 			</div>
