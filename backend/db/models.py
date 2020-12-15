@@ -1,7 +1,6 @@
 from sqlalchemy.sql import func
 from werkzeug.security import generate_password_hash, check_password_hash
 import enum
-from datetime import date, time
 from backend.db import db
 
 
@@ -27,14 +26,6 @@ class AppointmentStatus(enum.Enum):
 class PrescriptionStatus(enum.Enum):
     INACTIVE = 0
     ACTIVE = 1
-
-
-# specializations = db.Table('specializations',
-#                            db.Column('doctor_id', db.Integer, db.ForeignKey('users.id'), primary_key=True),
-#                            db.Column('specialization_id', db.Integer, db.ForeignKey('specialization.id'),
-#                                      primary_key=True)
-#                            )
-
 
 class User(db.Model):
     __tablename__ = 'users'

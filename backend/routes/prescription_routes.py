@@ -32,6 +32,7 @@ def addPrescription():
     return jsonify(new_prescription.serialize(None)), 200
 
 
+# Allows filtering by status
 @prescription_routes.route('/<username>', methods=['GET'])
 def getPrescriptionsByUser(username):
     user = User.query.filter_by(username=username).first()
@@ -62,6 +63,7 @@ def getPrescriptionsByUser(username):
     return jsonify(payload), 200
 
 
+# Allows updating of status or dosage
 @prescription_routes.route('', methods=['PUT'])
 def updatePrescription():
     id = request.args.get('id')

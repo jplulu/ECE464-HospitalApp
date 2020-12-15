@@ -10,8 +10,9 @@ import secrets
 dob_range = [datetime.strptime('1/1/1950 1:30 PM', '%m/%d/%Y %I:%M %p'),
              datetime.strptime('1/1/2000 4:50 AM', '%m/%d/%Y %I:%M %p')]
 
-
+# Generates random users
 def create_users(num_entries):
+    # Init arrays
     user_arr, email_arr, pw_arr, fname_arr, \
     lname_arr, dob_arr, pnum_arr, usertype_arr, uname_arr, userstat_arr = ([] for i in range(10))
     usertype_weighting = [models.UserType.PATIENT] * 100 + [models.UserType.DOCTOR] * 13 + [models.UserType.ADMIN] * 3
@@ -52,13 +53,14 @@ def create_users(num_entries):
 
 def create_specialization():
     spec_arr = []
-    specializations = open("./backend/specializations.txt").read().splitlines()
+    specializations = open("specializations.txt").read().splitlines()
     for spec in specializations:
         spec_arr.append(models.Specialization(spec))
 
     return spec_arr
 
 
+# Generates appointments for around 60% of the patients
 def create_appointment(patients, doctors):
     app_arr = []
     date_range = [datetime.strptime('1/1/2000 1:30 PM', '%m/%d/%Y %I:%M %p'),
@@ -85,6 +87,7 @@ def create_appointment(patients, doctors):
     return app_arr
 
 
+# Creates prescriptions for around 20% of patients
 def create_prescription(patients, doctors):
     prep_arr = []
     date_range = [datetime.strptime('1/1/2000 1:30 PM', '%m/%d/%Y %I:%M %p'),
@@ -113,22 +116,20 @@ def create_prescription(patients, doctors):
 
 
 def populate():
-    e = create_engine('mysql://root:password@localhost/hospital')
-    conn = e.connect()
+    e = create_engine('mysql+pymysql:///hospital')
     session = sessionmaker(bind=e)
     s = session()
     # Populate Specializations
-    for spec in create_specialization():
-        s.add(spec)
     try:
-        s.commit()
+        for spec in create_specialization():
+            s.add(spec)
+            s.commit()
     except exc.IntegrityError:
         s.rollback()
     # Populate Users
     usr_arr = create_users(300)
     spec = s.query(models.Specialization).all()
     for usr in usr_arr:
-        # usr.set_password(secrets.token_urlsafe(16))
         usr.set_password("1")
         # For doctors, select a specialization from pre established table
         if usr.user_type == models.UserType.DOCTOR:

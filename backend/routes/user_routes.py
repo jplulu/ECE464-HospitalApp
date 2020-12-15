@@ -65,6 +65,7 @@ def getUserByUsername():
     return jsonify(user.serialize()), 200
 
 
+# Allows filtering of doctors based on specialization and status
 @user_routes.route('/getDoctors', methods=['GET'])
 def getDoctors():
     spec_filter = request.args.get('spec')
@@ -88,6 +89,7 @@ def getDoctors():
     return jsonify(payload), 200
 
 
+# Allows updating of user status
 @user_routes.route('', methods=['PUT'])
 def updateUser():
     username = request.args.get('username')

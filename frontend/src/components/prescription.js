@@ -2,7 +2,6 @@ import React, { Component, Fragment } from "react";
 import axios from "axios";
 import Popup from "reactjs-popup";
 import "./popup.css";
-import { Table } from "semantic-ui-react";
 
 class Prescription extends Component {
 	constructor(props) {
@@ -101,7 +100,7 @@ class Prescription extends Component {
 												rows="10"
 												value={new_dosage}
 												onChange={this.handleChange}
-											></textarea>
+											/>
 											<button type="submit">Submit</button>
 										</form>
 									</div>

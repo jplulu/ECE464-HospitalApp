@@ -72,7 +72,7 @@ export class Addspec_admin extends Component {
 						<button type="submit">Add</button>
 					</div>
 				</form>
-				<br></br>
+				<br/>
 				<Table style={{ textAlign: "center", margin: "auto" }}>
 					<tbody>
 						{this.state.exist_spec.map((spec) => (
@@ -161,10 +161,10 @@ export class Getdoc_admin extends Component {
 				<Table align="center">
 					<tr>
 						<tr>
-							<td>Email</td>
-							<td>Name</td>
-							<td>Specialization</td>
-							<td>User status</td>
+							<td><b>Email</b></td>
+							<td><b>Name</b></td>
+							<td><b>Specialization</b></td>
+							<td><b>User status</b></td>
 						</tr>
 						{this.state.doctors.map((doctor) => (
 							<tr key={doctor.id}>
@@ -327,8 +327,7 @@ export class Getdoc_patient extends Component {
 			spec,
 			description,
 			date,
-			start,
-			selected_doctor,
+			start
 		} = this.state;
 		let SpecOptions = exist_spec.map((s) => (
 			<option value={s.spec}>{s.spec}</option>

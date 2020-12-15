@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import loggedIn from "./loggedIn";
 import Login from "./Login";
-import Nav from "./Nav";
 
 class Home extends Component {
 	componentDidMount() {
@@ -21,7 +20,7 @@ class Home extends Component {
 		return (
 			<div style={{ textAlign: "center" }}>
 				<h1>Welcome</h1>
-				<Login></Login>
+				<Login/>
 			</div>
 		);
 	}

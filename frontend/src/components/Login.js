@@ -25,9 +25,6 @@ class Login extends Component {
 		const { email, password } = this.state;
 		let emailError = "";
 		let passwordError = "";
-		// if (email === "" || !email.includes("@")) {
-		// 	emailError = "Invalid email";
-		// }
 		if (email === "") {
 			emailError = "Must not be empty";
 		}
@@ -53,7 +50,6 @@ class Login extends Component {
 		});
 		const isValid = this.validate();
 		if (isValid) {
-			// console.log(this.state);
 			axios
 				.post("http://localhost:5000/user/login", null, {
 					params: {

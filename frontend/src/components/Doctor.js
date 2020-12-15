@@ -325,7 +325,7 @@ class Doctor extends Component {
 															rows="10"
 															value={note}
 															onChange={this.handleChange}
-														></textarea>
+														/>
 														<button type="submit">Submit</button>
 													</form>
 												</div>
@@ -362,7 +362,7 @@ class Doctor extends Component {
 																rows="10"
 																value={drug}
 																onChange={this.handleChange}
-															></textarea>
+															/>
 															<textarea
 																name="dosage"
 																placeholder="Dosage"
@@ -370,7 +370,7 @@ class Doctor extends Component {
 																rows="10"
 																value={dosage}
 																onChange={this.handleChange}
-															></textarea>
+															/>
 															<button type="submit">Submit</button>
 														</form>
 													</div>
@@ -401,7 +401,7 @@ class Doctor extends Component {
 					</select>
 					<button type="submit">Filter</button>
 				</form>
-				<br></br>
+				<br/>
 				<Table style={{ textAlign: "center", margin: "auto" }}>
 					<tbody>
 						<tr>
@@ -422,7 +422,7 @@ class Doctor extends Component {
 							</td>
 						</tr>
 						{prescriptions.map((prescription) => (
-							<Prescription prescription={prescription}></Prescription>
+							<Prescription prescription={prescription}/>
 						))}
 					</tbody>
 				</Table>
@@ -438,13 +438,13 @@ class Doctor extends Component {
 				) : user_status !== "APPROVED" ? (
 					user_status === "PENDING" ? (
 						<div style={{ textAlign: "center", margin: "auto" }}>
-							<br></br>
+							<br/>
 							<h1>Your account has not been approved.</h1>
 							<h2>The admin team is working on it.</h2>
 						</div>
 					) : (
 						<div style={{ textAlign: "center", margin: "auto" }}>
-							<br></br>
+							<br/>
 							<h1>Your account has been rejected.</h1>
 							<h2>Please contact the admin team for more info.</h2>
 						</div>
