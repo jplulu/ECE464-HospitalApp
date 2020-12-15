@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import Nav from "./Nav";
 import axios from "axios";
 import loggedIn from "./loggedIn";
 import { Table } from "semantic-ui-react";
@@ -27,7 +26,7 @@ class Patient extends Component {
 
 	async componentDidMount() {
 		var user = JSON.parse(localStorage.getItem("user"));
-		if (loggedIn() && user.user_type == "PATIENT") {
+		if (loggedIn() && user.user_type === "PATIENT") {
 			const username = JSON.parse(localStorage.getItem("user")).username;
 			let appointments = [];
 			let prescriptions = [];
@@ -276,7 +275,7 @@ class Patient extends Component {
 						<div>{prescriptionMarkup}</div>
 					</TabPanel>
 					<TabPanel>
-						<Getdoc_patient></Getdoc_patient>
+						<Getdoc_patient/>
 					</TabPanel>
 				</Tabs>
 			</div>

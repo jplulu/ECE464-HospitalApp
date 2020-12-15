@@ -32,6 +32,7 @@ def addAppointment():
     return jsonify(new_appointment.serialize(None)), 200
 
 
+# Allows filtering by status of user
 @appointment_routes.route('/<username>', methods=['GET'])
 def getAppointmentsByUser(username):
     user = User.query.filter_by(username=username).first()
@@ -65,6 +66,7 @@ def getAppointmentsByUser(username):
     return jsonify(payload), 200
 
 
+# Updates the status or note for an appointment
 @appointment_routes.route('', methods=['PUT'])
 def updateAppointment():
     id = request.args.get('id')
