@@ -1,7 +1,6 @@
 from sqlalchemy.sql import func
 from werkzeug.security import generate_password_hash, check_password_hash
 import enum
-from datetime import date, time
 from backend.db import db
 
 

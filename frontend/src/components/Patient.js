@@ -193,7 +193,10 @@ class Patient extends Component {
 																status: "CANCELED",
 															},
 														})
-														.then(window.location.reload());
+														.then( () => {
+															window.location.reload()
+														})
+														.catch((error) => console.log(error));
 												}}
 											>
 												Cancel
