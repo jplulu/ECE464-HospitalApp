@@ -78,7 +78,7 @@ def create_appointment(patients, doctors):
         if randint(1, 10) > 4:
             description = "Placeholder"
             date = rand_date(date_range)
-            start = time(9, 10)
+            start = time(randint(1,23), randint(0,59))
             app = models.Appointment(description, date, start)
             app.patient = patient
             app.doctor = choice(doctors)
